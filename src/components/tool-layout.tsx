@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Download, Trash2, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface ToolLayoutProps {
   title: string;
@@ -146,12 +148,33 @@ export function ToolLayout({
             </div>
           </CardHeader>
           <CardContent>
-            <Textarea
-              value={inputValue}
-              onChange={(e) => onInputChange(e.target.value)}
-              placeholder={inputPlaceholder}
-              className="min-h-[300px] font-mono text-sm bg-code-bg resize-none"
-            />
+            <div className="relative">
+              <Textarea
+                value={inputValue}
+                onChange={(e) => onInputChange(e.target.value)}
+                placeholder={inputPlaceholder}
+                className="min-h-[300px] font-mono text-sm bg-transparent resize-none relative z-10"
+                style={{ color: 'transparent', caretColor: 'hsl(var(--foreground))' }}
+              />
+              <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none overflow-hidden rounded-md p-3">
+                <SyntaxHighlighter
+                  language="json"
+                  style={oneDark}
+                  customStyle={{
+                    margin: 0,
+                    padding: 0,
+                    background: 'transparent',
+                    fontSize: '0.875rem',
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", monospace',
+                    minHeight: '300px',
+                    overflow: 'hidden',
+                  }}
+                  showLineNumbers={false}
+                >
+                  {inputValue || inputPlaceholder}
+                </SyntaxHighlighter>
+              </div>
+            </div>
             <div className="flex gap-2 mt-4">
               <Button 
                 onClick={onProcess}
@@ -191,12 +214,25 @@ export function ToolLayout({
             </div>
           </CardHeader>
           <CardContent>
-            <Textarea
-              value={outputValue}
-              readOnly
-              placeholder={outputPlaceholder}
-              className="min-h-[300px] font-mono text-sm bg-code-bg resize-none"
-            />
+            <div className="relative">
+              <div className="min-h-[300px] border rounded-md overflow-auto bg-code-bg">
+                <SyntaxHighlighter
+                  language="json"
+                  style={oneDark}
+                  customStyle={{
+                    margin: 0,
+                    padding: '0.75rem',
+                    background: 'transparent',
+                    fontSize: '0.875rem',
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", monospace',
+                    minHeight: '300px',
+                  }}
+                  showLineNumbers={false}
+                >
+                  {outputValue || outputPlaceholder}
+                </SyntaxHighlighter>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

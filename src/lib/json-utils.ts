@@ -11,6 +11,7 @@ export interface JsonParseResult {
 export interface JsonFormatOptions {
   indent?: number;
   recursive?: boolean;
+  indentType?: 'space' | 'tab';
 }
 
 /**
@@ -32,7 +33,7 @@ export function safeJsonParse(jsonString: string): JsonParseResult {
  * Beautify/prettify JSON with optional recursive formatting
  */
 export function beautifyJson(input: string, options: JsonFormatOptions = {}): JsonParseResult {
-  const { indent = 2, recursive = false } = options;
+  const { indent = 2, recursive = false, indentType = 'space' } = options;
   
   const parseResult = safeJsonParse(input);
   if (!parseResult.success) {
@@ -46,7 +47,8 @@ export function beautifyJson(input: string, options: JsonFormatOptions = {}): Js
       result = recursiveJsonParse(result);
     }
     
-    const formatted = JSON.stringify(result, null, indent);
+    const indentString = indentType === 'tab' ? '\t' : indent;
+    const formatted = JSON.stringify(result, null, indentString);
     return { success: true, data: formatted };
   } catch (error) {
     return { 
