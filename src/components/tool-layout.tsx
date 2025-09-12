@@ -152,28 +152,32 @@ export function ToolLayout({
               <Textarea
                 value={inputValue}
                 onChange={(e) => onInputChange(e.target.value)}
-                placeholder={inputPlaceholder}
-                className="min-h-[300px] font-mono text-sm bg-transparent resize-none relative z-10"
-                style={{ color: 'transparent', caretColor: 'hsl(var(--foreground))' }}
+                placeholder={inputValue ? "" : inputPlaceholder}
+                className="min-h-[300px] font-mono text-sm resize-none relative z-10 bg-transparent"
+                style={{ 
+                  color: inputValue ? 'transparent' : 'hsl(var(--muted-foreground))', 
+                  caretColor: 'hsl(var(--foreground))' 
+                }}
               />
-              <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none overflow-hidden rounded-md p-3">
-                <SyntaxHighlighter
-                  language="json"
-                  style={oneDark}
-                  customStyle={{
-                    margin: 0,
-                    padding: 0,
-                    background: 'transparent',
-                    fontSize: '0.875rem',
-                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", monospace',
-                    minHeight: '300px',
-                    overflow: 'hidden',
-                  }}
-                  showLineNumbers={false}
-                >
-                  {inputValue || inputPlaceholder}
-                </SyntaxHighlighter>
-              </div>
+              {inputValue && (
+                <div className="absolute top-3 left-3 right-3 bottom-3 pointer-events-none overflow-hidden">
+                  <SyntaxHighlighter
+                    language="json"
+                    style={oneDark}
+                    customStyle={{
+                      margin: 0,
+                      padding: 0,
+                      background: 'transparent',
+                      fontSize: '0.875rem',
+                      fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", monospace',
+                      lineHeight: '1.4',
+                    }}
+                    showLineNumbers={false}
+                  >
+                    {inputValue}
+                  </SyntaxHighlighter>
+                </div>
+              )}
             </div>
             <div className="flex gap-2 mt-4">
               <Button 
