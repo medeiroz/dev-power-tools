@@ -1,12 +1,13 @@
 import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Download, Trash2, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { CodeEditor } from "@/components/code-editor";
 
 interface ToolLayoutProps {
   title: string;
@@ -148,37 +149,12 @@ export function ToolLayout({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="relative">
-              <Textarea
-                value={inputValue}
-                onChange={(e) => onInputChange(e.target.value)}
-                placeholder={inputValue ? "" : inputPlaceholder}
-                className="min-h-[300px] font-mono text-sm resize-none relative z-10 bg-transparent"
-                style={{ 
-                  color: inputValue ? 'transparent' : 'hsl(var(--muted-foreground))', 
-                  caretColor: 'hsl(var(--foreground))' 
-                }}
-              />
-              {inputValue && (
-                <div className="absolute top-3 left-3 right-3 bottom-3 pointer-events-none overflow-hidden">
-                  <SyntaxHighlighter
-                    language="json"
-                    style={oneDark}
-                    customStyle={{
-                      margin: 0,
-                      padding: 0,
-                      background: 'transparent',
-                      fontSize: '0.875rem',
-                      fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", monospace',
-                      lineHeight: '1.4',
-                    }}
-                    showLineNumbers={false}
-                  >
-                    {inputValue}
-                  </SyntaxHighlighter>
-                </div>
-              )}
-            </div>
+            <CodeEditor
+              value={inputValue}
+              onChange={onInputChange}
+              placeholder={inputPlaceholder}
+              minHeight={300}
+            />
             <div className="flex gap-2 mt-4">
               <Button 
                 onClick={onProcess}
