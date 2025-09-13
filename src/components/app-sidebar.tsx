@@ -14,7 +14,23 @@ import {
   FileText,
   Globe,
   Settings,
-  Zap
+  Zap,
+  Shield,
+  User,
+  Building,
+  MapPin,
+  Phone,
+  CreditCard,
+  IdCard,
+  Car,
+  Lock,
+  Calculator,
+  Archive,
+  FileType,
+  History,
+  TestTube,
+  Code,
+  Briefcase
 } from "lucide-react";
 
 import {
@@ -38,13 +54,46 @@ const jsonTools = [
   { title: "Flatten/Unflatten", url: "/json/flatten", icon: Maximize2 },
 ];
 
+const generators = [
+  { title: "CPF Generator", url: "/generators/cpf", icon: User },
+  { title: "CNPJ Generator", url: "/generators/cnpj", icon: Building },
+  { title: "CEP Generator", url: "/generators/cep", icon: MapPin },
+  { title: "Phone Generator", url: "/generators/phone", icon: Phone },
+  { title: "License Plate", url: "/generators/plate", icon: Car },
+  { title: "Person Generator", url: "/generators/person", icon: User },
+  { title: "Company Generator", url: "/generators/company", icon: Building },
+  { title: "Password Generator", url: "/generators/password", icon: Lock },
+  { title: "UUID Generator", url: "/generators/uuid", icon: Hash },
+  { title: "Lorem Ipsum", url: "/generators/lorem", icon: FileText },
+];
+
+const validators = [
+  { title: "CPF Validator", url: "/validators/cpf", icon: Shield },
+  { title: "CNPJ Validator", url: "/validators/cnpj", icon: Shield },
+  { title: "CEP Validator", url: "/validators/cep", icon: Shield },
+  { title: "Phone Validator", url: "/validators/phone", icon: Shield },
+  { title: "Email Validator", url: "/validators/email", icon: Shield },
+  { title: "Credit Card Validator", url: "/validators/creditcard", icon: CreditCard },
+  { title: "License Plate", url: "/validators/plate", icon: Shield },
+];
+
 const utilities = [
   { title: "JWT Decoder", url: "/utils/jwt", icon: Key },
-  { title: "Base64 Encode/Decode", url: "/utils/base64", icon: FileText },
+  { title: "Base64 Encode/Decode", url: "/utils/base64", icon: FileType },
   { title: "URL Encode/Decode", url: "/utils/url", icon: Globe },
-  { title: "UUID Generator", url: "/utils/uuid", icon: Hash },
+  { title: "Hash Generator", url: "/utils/hash", icon: Hash },
   { title: "Timestamp Converter", url: "/utils/timestamp", icon: Clock },
   { title: "Regex Tester", url: "/utils/regex", icon: Search },
+  { title: "Diff Tool", url: "/utils/diff", icon: GitCompare },
+  { title: "Markdown Editor", url: "/utils/markdown", icon: FileType },
+];
+
+const productivity = [
+  { title: "History", url: "/history", icon: History },
+  { title: "Snippet Library", url: "/snippets", icon: Code },
+  { title: "Regex Library", url: "/regex-library", icon: Archive },
+  { title: "Currency Converter", url: "/currency", icon: Calculator },
+  { title: "DDD Lookup", url: "/ddd", icon: Phone },
 ];
 
 export function AppSidebar() {
@@ -101,14 +150,86 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Other Utilities */}
+        {/* Generators */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/80">
-            {!isCollapsed && "Utilities"}
+            {!isCollapsed && "Generators"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {generators.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) => getNavClassName(isActive)}
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Validators */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/80">
+            {!isCollapsed && "Validators"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {validators.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) => getNavClassName(isActive)}
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Developer Utilities */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/80">
+            {!isCollapsed && "Dev Utilities"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {utilities.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) => getNavClassName(isActive)}
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Productivity */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/80">
+            {!isCollapsed && "Productivity"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {productivity.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink

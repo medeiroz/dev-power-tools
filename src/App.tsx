@@ -11,6 +11,17 @@ import { JsonEscape } from "@/components/json-escape";
 import { JsonGenerator } from "@/components/json-generator";
 import { JsonCompare } from "@/components/json-compare";
 import { JsonFlatten } from "@/components/json-flatten";
+import { History } from "@/components/history";
+import { CPFGenerator } from "@/components/generators/cpf-generator";
+import { CNPJGenerator } from "@/components/generators/cnpj-generator";
+import { PhoneGenerator } from "@/components/generators/phone-generator";
+import { PasswordGenerator } from "@/components/generators/password-generator";
+import { UUIDGenerator } from "@/components/generators/uuid-generator";
+import { CPFValidator } from "@/components/validators/cpf-validator";
+import { CNPJValidator } from "@/components/validators/cnpj-validator";
+import { EmailValidator } from "@/components/validators/email-validator";
+import { JWTDecoder } from "@/components/utilities/jwt-decoder";
+import { Base64Converter } from "@/components/utilities/base64-converter";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,7 +55,26 @@ const App = () => (
                   <Route path="/json/generator" element={<JsonGenerator />} />
                   <Route path="/json/compare" element={<JsonCompare />} />
                   <Route path="/json/flatten" element={<JsonFlatten />} />
-                  {/* TODO: Add utility routes */}
+                  
+                  {/* Generators */}
+                  <Route path="/generators/cpf" element={<CPFGenerator />} />
+                  <Route path="/generators/cnpj" element={<CNPJGenerator />} />
+                  <Route path="/generators/phone" element={<PhoneGenerator />} />
+                  <Route path="/generators/password" element={<PasswordGenerator />} />
+                  <Route path="/generators/uuid" element={<UUIDGenerator />} />
+                  
+                  {/* Validators */}
+                  <Route path="/validators/cpf" element={<CPFValidator />} />
+                  <Route path="/validators/cnpj" element={<CNPJValidator />} />
+                  <Route path="/validators/email" element={<EmailValidator />} />
+                  
+                  {/* Utilities */}
+                  <Route path="/utils/jwt" element={<JWTDecoder />} />
+                  <Route path="/utils/base64" element={<Base64Converter />} />
+                  
+                  {/* Productivity */}
+                  <Route path="/history" element={<History />} />
+                  
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
