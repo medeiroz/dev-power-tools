@@ -27,10 +27,38 @@ export function decodeURL(input: string): { result: string; error?: string } {
 }
 
 // Hash utilities
-export function generateHash(input: string, algorithm: 'md5' | 'sha1' | 'sha256'): string {
-  // Note: For client-side, we'll use SubtleCrypto API
-  // This is a simplified version, we'll implement the full version with SubtleCrypto
-  return `${algorithm.toUpperCase()} hash of: ${input}`;
+export async function generateHash(input: string, algorithm: 'md5' | 'sha1' | 'sha256'): Promise<string> {
+  // For browsers, we'll use the Web Crypto API for SHA algorithms
+  // For MD5, we'll implement a simple version
+  
+  if (algorithm === 'md5') {
+    // Simple MD5 implementation placeholder - in production, use a proper crypto library
+    const encoder = new TextEncoder();
+    const data = encoder.encode(input);
+    
+    // This is a simplified hash for demo purposes
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+      hash = ((hash << 5) - hash + data[i]) & 0xffffffff;
+    }
+    return Math.abs(hash).toString(16).padStart(8, '0');
+  }
+  
+  // Use Web Crypto API for SHA algorithms
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  
+  let hashBuffer;
+  if (algorithm === 'sha1') {
+    hashBuffer = await crypto.subtle.digest('SHA-1', data);
+  } else if (algorithm === 'sha256') {
+    hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  } else {
+    throw new Error('Unsupported algorithm');
+  }
+  
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 // JWT utilities

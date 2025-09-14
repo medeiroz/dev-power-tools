@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ToolLayout } from "./tool-layout";
-import { escapeJson, unescapeJson } from "@/lib/json-utils";
+import { ToolLayout } from "@/components/tool-layout";
 import { useHistory } from "@/hooks/use-history";
 
-export function JsonEscape() {
+export function UrlEncoder() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [mode, setMode] = useState<"escape" | "unescape">("escape");
+  const [mode, setMode] = useState<"encode" | "decode">("encode");
   const { addHistoryEntry } = useHistory();
 
   const handleProcess = () => {
@@ -18,15 +17,15 @@ export function JsonEscape() {
 
     try {
       let result;
-      if (mode === "escape") {
-        result = escapeJson(input);
+      if (mode === "encode") {
+        result = encodeURIComponent(input);
       } else {
-        result = unescapeJson(input);
+        result = decodeURIComponent(input);
       }
       setOutput(result);
       
       addHistoryEntry({
-        tool: "JSON Escape",
+        tool: "URL Encoder",
         operation: mode,
         input: input,
         output: result,
@@ -37,7 +36,7 @@ export function JsonEscape() {
       setOutput(`Error: ${errorMsg}`);
       
       addHistoryEntry({
-        tool: "JSON Escape",
+        tool: "URL Encoder",
         operation: mode,
         input: input,
         output: "",
@@ -53,7 +52,7 @@ export function JsonEscape() {
   };
 
   const handleModeChange = (newMode: string) => {
-    setMode(newMode as "escape" | "unescape");
+    setMode(newMode as "encode" | "decode");
     // Auto-process when mode changes
     setTimeout(handleProcess, 0);
   };
@@ -62,20 +61,20 @@ export function JsonEscape() {
     <div className="flex-1 space-y-6 p-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          JSON Escape / Unescape
+          URL Encode / Decode
         </h1>
         <p className="text-muted-foreground">
-          Escape JSON for embedding in strings or unescape JSON from string format.
+          Encode URLs for safe transmission or decode URL-encoded strings.
         </p>
       </div>
 
       <Tabs value={mode} onValueChange={handleModeChange}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="escape">Escape</TabsTrigger>
-          <TabsTrigger value="unescape">Unescape</TabsTrigger>
+          <TabsTrigger value="encode">Encode</TabsTrigger>
+          <TabsTrigger value="decode">Decode</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="escape">
+        <TabsContent value="encode">
           <ToolLayout
             title=""
             description=""
@@ -84,14 +83,14 @@ export function JsonEscape() {
             onInputChange={setInput}
             onClear={handleClear}
             onProcess={handleProcess}
-            processLabel="Escape"
-            inputPlaceholder='{"message": "Hello \"World\"!\nThis is a test."}'
-            outputPlaceholder='Escaped JSON will appear here...'
-            toolName="JSON Escape"
+            processLabel="Encode"
+            inputPlaceholder='https://example.com/search?q=hello world&type=web'
+            outputPlaceholder='URL encoded string will appear here...'
+            toolName="URL Encoder"
           />
         </TabsContent>
         
-        <TabsContent value="unescape">
+        <TabsContent value="decode">
           <ToolLayout
             title=""
             description=""
@@ -100,10 +99,10 @@ export function JsonEscape() {
             onInputChange={setInput}
             onClear={handleClear}
             onProcess={handleProcess}
-            processLabel="Unescape"
-            inputPlaceholder='{\"message\": \"Hello \\\"World\\\"!\\nThis is a test.\"}'
-            outputPlaceholder='Unescaped JSON will appear here...'
-            toolName="JSON Escape"
+            processLabel="Decode"
+            inputPlaceholder='https%3A//example.com/search%3Fq%3Dhello%20world%26type%3Dweb'
+            outputPlaceholder='URL decoded string will appear here...'
+            toolName="URL Encoder"
           />
         </TabsContent>
       </Tabs>

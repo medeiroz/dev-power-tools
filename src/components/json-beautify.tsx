@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ToolLayout } from "./tool-layout";
 import { beautifyJson } from "@/lib/json-utils";
+import { useHistory } from "@/hooks/use-history";
 
 export function JsonBeautify() {
   const [input, setInput] = useState("");
@@ -14,6 +15,7 @@ export function JsonBeautify() {
   const [indentType, setIndentType] = useState<'space' | 'tab'>('space');
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [error, setError] = useState("");
+  const { addHistoryEntry } = useHistory();
 
   const handleProcess = () => {
     if (!input.trim()) {
@@ -33,10 +35,27 @@ export function JsonBeautify() {
       setOutput(result.data || "");
       setIsValid(true);
       setError("");
+      
+      addHistoryEntry({
+        tool: "JSON Beautify",
+        operation: "beautify",
+        input: input,
+        output: result.data || "",
+        options: { recursive, indent: indent[0], indentType }
+      });
     } else {
       setOutput("");
       setIsValid(false);
       setError(result.error || "Unknown error");
+      
+      addHistoryEntry({
+        tool: "JSON Beautify",
+        operation: "beautify",
+        input: input,
+        output: "",
+        error: result.error || "Unknown error",
+        options: { recursive, indent: indent[0], indentType }
+      });
     }
   };
 
@@ -119,6 +138,7 @@ export function JsonBeautify() {
       error={error}
       inputPlaceholder='{"name":"John","age":30,"city":"New York"}'
       options={options}
+      toolName="JSON Beautify"
     />
   );
 }

@@ -219,8 +219,9 @@ export function validatePhone(phone: string): { valid: boolean; error?: string }
 }
 
 // RG utilities
-export function generateRG(): string {
-  return Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('');
+export function generateRG(withMask: boolean = false): string {
+  const rg = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('');
+  return withMask ? formatRG(rg) : rg;
 }
 
 export function formatRG(rg: string): string {

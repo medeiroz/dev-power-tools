@@ -11,7 +11,12 @@ import { JsonEscape } from "@/components/json-escape";
 import { JsonGenerator } from "@/components/json-generator";
 import { JsonCompare } from "@/components/json-compare";
 import { JsonFlatten } from "@/components/json-flatten";
-import { History } from "@/components/history";
+import { RGGenerator } from "@/components/generators/rg-generator";
+import { CEPGenerator } from "@/components/generators/cep-generator";
+import { RGValidator } from "@/components/validators/rg-validator";
+import { UrlEncoder } from "@/components/utilities/url-encoder";
+import { HashGenerator } from "@/components/utilities/hash-generator";
+import { TimestampConverter } from "@/components/utilities/timestamp-converter";
 import { CPFGenerator } from "@/components/generators/cpf-generator";
 import { CNPJGenerator } from "@/components/generators/cnpj-generator";
 import { PhoneGenerator } from "@/components/generators/phone-generator";
@@ -22,7 +27,8 @@ import { CNPJValidator } from "@/components/validators/cnpj-validator";
 import { EmailValidator } from "@/components/validators/email-validator";
 import { JWTDecoder } from "@/components/utilities/jwt-decoder";
 import { Base64Converter } from "@/components/utilities/base64-converter";
-import NotFound from "./pages/NotFound";
+import NotFound from "@/pages/NotFound";
+import { History } from "@/components/history";
 
 const queryClient = new QueryClient();
 
@@ -62,15 +68,21 @@ const App = () => (
                   <Route path="/generators/phone" element={<PhoneGenerator />} />
                   <Route path="/generators/password" element={<PasswordGenerator />} />
                   <Route path="/generators/uuid" element={<UUIDGenerator />} />
+                  <Route path="/generators/rg" element={<RGGenerator />} />
+                  <Route path="/generators/cep" element={<CEPGenerator />} />
                   
                   {/* Validators */}
                   <Route path="/validators/cpf" element={<CPFValidator />} />
                   <Route path="/validators/cnpj" element={<CNPJValidator />} />
                   <Route path="/validators/email" element={<EmailValidator />} />
+                  <Route path="/validators/rg" element={<RGValidator />} />
                   
                   {/* Utilities */}
                   <Route path="/utils/jwt" element={<JWTDecoder />} />
                   <Route path="/utils/base64" element={<Base64Converter />} />
+                  <Route path="/utilities/url-encoder" element={<UrlEncoder />} />
+                  <Route path="/utilities/hash-generator" element={<HashGenerator />} />
+                  <Route path="/utilities/timestamp-converter" element={<TimestampConverter />} />
                   
                   {/* Productivity */}
                   <Route path="/history" element={<History />} />

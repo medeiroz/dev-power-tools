@@ -87,17 +87,17 @@ export function History() {
             
             <div className="w-full sm:w-48">
               <Label htmlFor="tool-filter">Filter by Tool</Label>
-              <Select value={filterTool} onValueChange={setFilterTool}>
-                <SelectTrigger id="tool-filter">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Tools</SelectItem>
-                  {uniqueTools.map(tool => (
-                    <SelectItem key={tool} value={tool}>{tool}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <Select value={filterTool} onValueChange={setFilterTool}>
+            <SelectTrigger id="tool-filter">
+              <SelectValue placeholder="All Tools" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tools</SelectItem>
+              {uniqueTools.map(tool => (
+                <SelectItem key={tool} value={tool}>{tool}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
             </div>
           </div>
           

@@ -57,13 +57,9 @@ const jsonTools = [
 const generators = [
   { title: "CPF Generator", url: "/generators/cpf", icon: User },
   { title: "CNPJ Generator", url: "/generators/cnpj", icon: Building },
+  { title: "RG Generator", url: "/generators/rg", icon: IdCard },
   { title: "CEP Generator", url: "/generators/cep", icon: MapPin },
   { title: "Phone Generator", url: "/generators/phone", icon: Phone },
-  { title: "License Plate", url: "/generators/plate", icon: Car },
-  { title: "Person Generator", url: "/generators/person", icon: User },
-  { title: "Company Generator", url: "/generators/company", icon: Building },
-  { title: "Password Generator", url: "/generators/password", icon: Lock },
-  { title: "UUID Generator", url: "/generators/uuid", icon: Hash },
   { title: "Lorem Ipsum", url: "/generators/lorem", icon: FileText },
 ];
 

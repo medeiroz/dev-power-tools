@@ -1,10 +1,11 @@
 import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download, Trash2, CheckCircle, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Copy, Download, Trash2, CheckCircle, AlertCircle, History, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useHistory } from "@/hooks/use-history";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CodeEditor } from "@/components/code-editor";
@@ -24,6 +25,7 @@ interface ToolLayoutProps {
   inputPlaceholder?: string;
   outputPlaceholder?: string;
   options?: ReactNode;
+  toolName?: string; // Add toolName for history filtering
 }
 
 export function ToolLayout({
@@ -41,8 +43,12 @@ export function ToolLayout({
   inputPlaceholder = "Enter your input here...",
   outputPlaceholder = "Output will appear here...",
   options,
+  toolName,
 }: ToolLayoutProps) {
   const { toast } = useToast();
+  const { getHistoryByTool } = useHistory();
+  
+  const toolHistory = toolName ? getHistoryByTool(toolName) : [];
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -162,6 +168,79 @@ export function ToolLayout({
               >
                 {processLabel}
               </Button>
+              {toolName && toolHistory.length > 0 && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <History className="h-4 w-4 mr-2" />
+                      History ({toolHistory.length})
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+                    <DialogHeader>
+                      <DialogTitle>{toolName} History</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      {toolHistory.slice(0, 10).map((entry) => (
+                        <Card key={entry.id} className="relative">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Badge variant={entry.error ? "destructive" : "default"} className="gap-1">
+                                  {entry.error ? (
+                                    <>
+                                      <AlertCircle className="h-3 w-3" />
+                                      Error
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle className="h-3 w-3" />
+                                      Success
+                                    </>
+                                  )}
+                                </Badge>
+                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(entry.timestamp).toLocaleString()}
+                                </div>
+                              </div>
+                              {!entry.error && entry.output && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => copyToClipboard(entry.output, "Output")}
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            {entry.input && (
+                              <div>
+                                <div className="text-xs font-medium mb-1">Input:</div>
+                                <div className="bg-muted p-2 rounded text-xs font-mono max-h-20 overflow-auto">
+                                  {entry.input.length > 200 ? entry.input.substring(0, 200) + "..." : entry.input}
+                                </div>
+                              </div>
+                            )}
+                            <div>
+                              <div className="text-xs font-medium mb-1">
+                                {entry.error ? "Error:" : "Output:"}
+                              </div>
+                              <div className={`p-2 rounded text-xs font-mono max-h-20 overflow-auto ${
+                                entry.error ? 'bg-destructive/10 text-destructive' : 'bg-muted'
+                              }`}>
+                                {entry.error || (entry.output.length > 200 ? entry.output.substring(0, 200) + "..." : entry.output)}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           </CardContent>
         </Card>

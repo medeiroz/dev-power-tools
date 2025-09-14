@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { ToolLayout } from "./tool-layout";
 import { minifyJson } from "@/lib/json-utils";
+import { useHistory } from "@/hooks/use-history";
 
 export function JsonMinify() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [error, setError] = useState("");
+  const { addHistoryEntry } = useHistory();
 
   const handleProcess = () => {
     if (!input.trim()) {
@@ -22,10 +24,25 @@ export function JsonMinify() {
       setOutput(result.data || "");
       setIsValid(true);
       setError("");
+      
+      addHistoryEntry({
+        tool: "JSON Minify",
+        operation: "minify",
+        input: input,
+        output: result.data || ""
+      });
     } else {
       setOutput("");
       setIsValid(false);
       setError(result.error || "Unknown error");
+      
+      addHistoryEntry({
+        tool: "JSON Minify",
+        operation: "minify",
+        input: input,
+        output: "",
+        error: result.error || "Unknown error"
+      });
     }
   };
 
@@ -68,6 +85,7 @@ export function JsonMinify() {
   "age": 30,
   "city": "New York"
 }`}
+      toolName="JSON Minify"
     />
   );
 }

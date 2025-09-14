@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, ArrowLeftRight, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { compareJson } from "@/lib/json-utils";
+import { useHistory } from "@/hooks/use-history";
 
 export function JsonCompare() {
   const [input1, setInput1] = useState("");
@@ -14,6 +15,7 @@ export function JsonCompare() {
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const { toast } = useToast();
+  const { addHistoryEntry } = useHistory();
 
   const handleCompare = () => {
     if (!input1.trim() || !input2.trim()) {
@@ -29,10 +31,26 @@ export function JsonCompare() {
       setDifferences(result.data || []);
       setIsValid(true);
       setError("");
+      
+      addHistoryEntry({
+        tool: "JSON Compare",
+        operation: "compare",
+        input: `JSON 1: ${input1}\n\nJSON 2: ${input2}`,
+        output: result.data?.length ? `Found ${result.data.length} differences` : "No differences found",
+        options: { differencesCount: result.data?.length || 0 }
+      });
     } else {
       setDifferences([]);
       setIsValid(false);
       setError(result.error || "Comparison failed");
+      
+      addHistoryEntry({
+        tool: "JSON Compare",
+        operation: "compare",
+        input: `JSON 1: ${input1}\n\nJSON 2: ${input2}`,
+        output: "",
+        error: result.error || "Comparison failed"
+      });
     }
   };
 
