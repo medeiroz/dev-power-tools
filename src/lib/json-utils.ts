@@ -198,13 +198,27 @@ export function unflattenJson(flatObj: Record<string, any>): any {
     
     for (let i = 0; i < keys.length - 1; i++) {
       const currentKey = keys[i];
+      const nextKey = keys[i + 1];
+      
       if (!(currentKey in current)) {
-        current[currentKey] = {};
+        // Check if next key is a number (array index)
+        const isArrayIndex = /^\d+$/.test(nextKey);
+        current[currentKey] = isArrayIndex ? [] : {};
       }
       current = current[currentKey];
     }
     
-    current[keys[keys.length - 1]] = flatObj[key];
+    const lastKey = keys[keys.length - 1];
+    // Handle array indices
+    if (/^\d+$/.test(lastKey)) {
+      const index = parseInt(lastKey, 10);
+      if (!Array.isArray(current)) {
+        current = [];
+      }
+      current[index] = flatObj[key];
+    } else {
+      current[lastKey] = flatObj[key];
+    }
   }
   
   return result;

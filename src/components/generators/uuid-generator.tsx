@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolLayout } from "@/components/tool-layout";
+import { GeneratorLayout } from "@/components/generator-layout";
 import { generateUUID } from "@/lib/dev-utils";
 import { useHistory } from "@/hooks/use-history";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -51,18 +51,16 @@ export function UUIDGenerator() {
   );
 
   return (
-    <ToolLayout
+    <GeneratorLayout
       title="UUID Generator"
       description="Generate UUIDs (Universally Unique Identifiers) in different versions"
-      inputValue=""
       outputValue={output}
-      onInputChange={() => {}}
+      onGenerate={handleGenerate}
       onClear={() => setOutput("")}
-      onProcess={handleGenerate}
-      processLabel="Generate UUID"
-      inputPlaceholder="Click 'Generate UUID' to create a new UUID"
+      generateLabel="Generate UUID"
       outputPlaceholder="Generated UUID will appear here..."
       options={options}
+      toolName="UUID Generator"
     />
   );
 }

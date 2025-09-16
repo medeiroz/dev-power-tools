@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -13,9 +13,11 @@ export function JsonBeautify() {
   const [recursive, setRecursive] = useState(true);
   const [indent, setIndent] = useState([2]);
   const [indentType, setIndentType] = useState<'space' | 'tab'>('space');
+  const [wrapLines, setWrapLines] = useState(false);
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [error, setError] = useState("");
   const { addHistoryEntry } = useHistory();
+  const outputRef = useRef<HTMLDivElement>(null);
 
   const handleProcess = () => {
     if (!input.trim()) {
@@ -36,12 +38,17 @@ export function JsonBeautify() {
       setIsValid(true);
       setError("");
       
+      // Scroll to output section
+      setTimeout(() => {
+        outputRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      
       addHistoryEntry({
         tool: "JSON Beautify",
         operation: "beautify",
         input: input,
         output: result.data || "",
-        options: { recursive, indent: indent[0], indentType }
+        options: { recursive, indent: indent[0], indentType, wrapLines }
       });
     } else {
       setOutput("");
@@ -54,7 +61,7 @@ export function JsonBeautify() {
         input: input,
         output: "",
         error: result.error || "Unknown error",
-        options: { recursive, indent: indent[0], indentType }
+        options: { recursive, indent: indent[0], indentType, wrapLines }
       });
     }
   };
@@ -72,7 +79,7 @@ export function JsonBeautify() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [input, recursive, indent, indentType]);
+  }, [input, recursive, indent, indentType, wrapLines]);
 
   const handleClear = () => {
     setInput("");
@@ -121,6 +128,17 @@ export function JsonBeautify() {
           />
         </div>
       )}
+      
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="wrap-lines"
+          checked={wrapLines}
+          onCheckedChange={setWrapLines}
+        />
+        <Label htmlFor="wrap-lines" className="text-sm">
+          Wrap long lines in editor
+        </Label>
+      </div>
     </div>
   );
 
@@ -139,6 +157,8 @@ export function JsonBeautify() {
       inputPlaceholder='{"name":"John","age":30,"city":"New York"}'
       options={options}
       toolName="JSON Beautify"
+      wrapLines={wrapLines}
+      outputRef={outputRef}
     />
   );
 }

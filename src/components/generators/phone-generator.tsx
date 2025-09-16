@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolLayout } from "@/components/tool-layout";
+import { GeneratorLayout } from "@/components/generator-layout";
 import { generatePhone } from "@/lib/brazilian-utils";
 import { useHistory } from "@/hooks/use-history";
 import { Switch } from "@/components/ui/switch";
@@ -46,18 +46,16 @@ export function PhoneGenerator() {
   );
 
   return (
-    <ToolLayout
+    <GeneratorLayout
       title="Phone Generator"
       description="Generate valid Brazilian phone numbers for testing purposes"
-      inputValue=""
       outputValue={output}
-      onInputChange={() => {}}
+      onGenerate={handleGenerate}
       onClear={() => setOutput("")}
-      onProcess={handleGenerate}
-      processLabel="Generate Phone"
-      inputPlaceholder="Click 'Generate Phone' to create a new phone number"
+      generateLabel="Generate Phone"
       outputPlaceholder="Generated phone number will appear here..."
       options={options}
+      toolName="Phone Generator"
     />
   );
 }

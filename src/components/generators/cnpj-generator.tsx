@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolLayout } from "@/components/tool-layout";
+import { GeneratorLayout } from "@/components/generator-layout";
 import { generateCNPJ } from "@/lib/brazilian-utils";
 import { useHistory } from "@/hooks/use-history";
 import { Switch } from "@/components/ui/switch";
@@ -46,18 +46,16 @@ export function CNPJGenerator() {
   );
 
   return (
-    <ToolLayout
+    <GeneratorLayout
       title="CNPJ Generator"
       description="Generate valid Brazilian CNPJ numbers for testing purposes"
-      inputValue=""
       outputValue={output}
-      onInputChange={() => {}}
+      onGenerate={handleGenerate}
       onClear={() => setOutput("")}
-      onProcess={handleGenerate}
-      processLabel="Generate CNPJ"
-      inputPlaceholder="Click 'Generate CNPJ' to create a new CNPJ"
+      generateLabel="Generate CNPJ"
       outputPlaceholder="Generated CNPJ will appear here..."
       options={options}
+      toolName="CNPJ Generator"
     />
   );
 }

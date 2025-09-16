@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolLayout } from "@/components/tool-layout";
+import { GeneratorLayout } from "@/components/generator-layout";
 import { generateRG } from "@/lib/brazilian-utils";
 import { useHistory } from "@/hooks/use-history";
 import { Switch } from "@/components/ui/switch";
@@ -46,17 +46,14 @@ export function RGGenerator() {
   );
 
   return (
-    <ToolLayout
+    <GeneratorLayout
       title="RG Generator"
-      description="Generate valid Brazilian RG (Registro Geral) numbers for testing purposes"
-      inputValue=""
+      description="Generate Brazilian RG (Registro Geral) numbers for testing purposes"
       outputValue={output}
-      onInputChange={() => {}}
+      onGenerate={handleGenerate}
       onClear={() => setOutput("")}
-      onProcess={handleGenerate}
-      processLabel="Generate RG"
-      inputPlaceholder="Click 'Generate RG' to create a new RG number"
-      outputPlaceholder="Generated RG number will appear here..."
+      generateLabel="Generate RG"
+      outputPlaceholder="Generated RG will appear here..."
       options={options}
       toolName="RG Generator"
     />

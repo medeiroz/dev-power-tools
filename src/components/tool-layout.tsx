@@ -25,7 +25,9 @@ interface ToolLayoutProps {
   inputPlaceholder?: string;
   outputPlaceholder?: string;
   options?: ReactNode;
-  toolName?: string; // Add toolName for history filtering
+  toolName?: string;
+  wrapLines?: boolean;
+  outputRef?: React.RefObject<HTMLDivElement>;
 }
 
 export function ToolLayout({
@@ -44,6 +46,8 @@ export function ToolLayout({
   outputPlaceholder = "Output will appear here...",
   options,
   toolName,
+  wrapLines = false,
+  outputRef,
 }: ToolLayoutProps) {
   const { toast } = useToast();
   const { getHistoryByTool } = useHistory();
@@ -160,6 +164,7 @@ export function ToolLayout({
               onChange={onInputChange}
               placeholder={inputPlaceholder}
               minHeight={300}
+              wrapLines={wrapLines}
             />
             <div className="flex gap-2 mt-4">
               <Button 
@@ -246,7 +251,7 @@ export function ToolLayout({
         </Card>
 
         {/* Output */}
-        <Card className="h-fit">
+        <Card className="h-fit" ref={outputRef}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-sm font-medium">Output</CardTitle>
             <div className="flex gap-2">
@@ -285,8 +290,11 @@ export function ToolLayout({
                     fontSize: '0.875rem',
                     fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", monospace',
                     minHeight: '300px',
+                    whiteSpace: wrapLines ? 'pre-wrap' : 'pre',
+                    wordWrap: wrapLines ? 'break-word' : 'normal',
                   }}
                   showLineNumbers={false}
+                  wrapLines={wrapLines}
                 >
                   {outputValue || outputPlaceholder}
                 </SyntaxHighlighter>

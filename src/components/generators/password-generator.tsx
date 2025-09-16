@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolLayout } from "@/components/tool-layout";
+import { GeneratorLayout } from "@/components/generator-layout";
 import { generatePassword, type PasswordOptions } from "@/lib/dev-utils";
 import { useHistory } from "@/hooks/use-history";
 import { Switch } from "@/components/ui/switch";
@@ -106,18 +106,16 @@ export function PasswordGenerator() {
   );
 
   return (
-    <ToolLayout
+    <GeneratorLayout
       title="Password Generator"
       description="Generate secure passwords with customizable options"
-      inputValue=""
       outputValue={output}
-      onInputChange={() => {}}
+      onGenerate={handleGenerate}
       onClear={() => setOutput("")}
-      onProcess={handleGenerate}
-      processLabel="Generate Password"
-      inputPlaceholder="Click 'Generate Password' to create a new password"
+      generateLabel="Generate Password"
       outputPlaceholder="Generated password will appear here..."
       options={optionControls}
+      toolName="Password Generator"
     />
   );
 }

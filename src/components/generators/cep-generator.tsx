@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolLayout } from "@/components/tool-layout";
+import { GeneratorLayout } from "@/components/generator-layout";
 import { generateCEP } from "@/lib/brazilian-utils";
 import { useHistory } from "@/hooks/use-history";
 import { Switch } from "@/components/ui/switch";
@@ -46,16 +46,13 @@ export function CEPGenerator() {
   );
 
   return (
-    <ToolLayout
+    <GeneratorLayout
       title="CEP Generator"
-      description="Generate valid Brazilian postal codes (CEP) for testing purposes"
-      inputValue=""
+      description="Generate Brazilian CEP (postal code) numbers for testing purposes"
       outputValue={output}
-      onInputChange={() => {}}
+      onGenerate={handleGenerate}
       onClear={() => setOutput("")}
-      onProcess={handleGenerate}
-      processLabel="Generate CEP"
-      inputPlaceholder="Click 'Generate CEP' to create a new postal code"
+      generateLabel="Generate CEP"
       outputPlaceholder="Generated CEP will appear here..."
       options={options}
       toolName="CEP Generator"

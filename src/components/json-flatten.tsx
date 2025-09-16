@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToolLayout } from "./tool-layout";
 import { flattenJson, unflattenJson, safeJsonParse } from "@/lib/json-utils";
+import { useHistory } from "@/hooks/use-history";
 
 export function JsonFlatten() {
   const [input, setInput] = useState("");
@@ -9,6 +10,7 @@ export function JsonFlatten() {
   const [mode, setMode] = useState<"flatten" | "unflatten">("flatten");
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [error, setError] = useState("");
+  const { addHistoryEntry } = useHistory();
 
   const handleProcess = () => {
     if (!input.trim()) {
@@ -32,6 +34,14 @@ export function JsonFlatten() {
         setOutput(JSON.stringify(flattened, null, 2));
         setIsValid(true);
         setError("");
+      
+        addHistoryEntry({
+          tool: "JSON Flatten",
+          operation: mode,
+          input: input,
+          output: JSON.stringify(flattened, null, 2),
+          options: { mode }
+        });
       } else {
         // For unflatten, expect a flat object with dot notation keys
         const parseResult = safeJsonParse(input);
@@ -46,11 +56,28 @@ export function JsonFlatten() {
         setOutput(JSON.stringify(unflattened, null, 2));
         setIsValid(true);
         setError("");
+        
+        addHistoryEntry({
+          tool: "JSON Flatten",
+          operation: mode,
+          input: input,
+          output: JSON.stringify(unflattened, null, 2),
+          options: { mode }
+        });
       }
     } catch (error) {
       setIsValid(false);
       setError(error instanceof Error ? error.message : 'Processing error');
       setOutput("");
+      
+      addHistoryEntry({
+        tool: "JSON Flatten",
+        operation: mode,
+        input: input,
+        output: "",
+        error: error instanceof Error ? error.message : 'Processing error',
+        options: { mode }
+      });
     }
   };
 
@@ -135,7 +162,7 @@ export function JsonFlatten() {
             isValid={isValid}
             error={error}
             inputPlaceholder={flattenExample}
-            outputPlaceholder="Flattened JSON with dot notation keys will appear here..."
+            toolName="JSON Flatten"
           />
         </TabsContent>
         
@@ -153,6 +180,7 @@ export function JsonFlatten() {
             error={error}
             inputPlaceholder={unflattenExample}
             outputPlaceholder="Nested JSON structure will appear here..."
+            toolName="JSON Flatten"
           />
         </TabsContent>
       </Tabs>

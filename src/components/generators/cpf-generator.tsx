@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolLayout } from "@/components/tool-layout";
+import { GeneratorLayout } from "@/components/generator-layout";
 import { generateCPF } from "@/lib/brazilian-utils";
 import { useHistory } from "@/hooks/use-history";
 import { Switch } from "@/components/ui/switch";
@@ -46,18 +46,16 @@ export function CPFGenerator() {
   );
 
   return (
-    <ToolLayout
+    <GeneratorLayout
       title="CPF Generator"
       description="Generate valid Brazilian CPF numbers for testing purposes"
-      inputValue=""
       outputValue={output}
-      onInputChange={() => {}}
+      onGenerate={handleGenerate}
       onClear={() => setOutput("")}
-      onProcess={handleGenerate}
-      processLabel="Generate CPF"
-      inputPlaceholder="Click 'Generate CPF' to create a new CPF"
+      generateLabel="Generate CPF"
       outputPlaceholder="Generated CPF will appear here..."
       options={options}
+      toolName="CPF Generator"
     />
   );
 }
