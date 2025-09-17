@@ -48,7 +48,7 @@ import {
 const jsonTools = [
   { title: "JSON Beautify", url: "/json/beautify", icon: Code2 },
   { title: "JSON Minify", url: "/json/minify", icon: Minimize2 },
-  { title: "JSON Escape", url: "/json/escape", icon: Hash },
+  { title: "JSON Escape/Unescape", url: "/json/escape", icon: Hash },
   { title: "JSON Compare", url: "/json/compare", icon: GitCompare },
   { title: "JSON Generator", url: "/json/generator", icon: Shuffle },
   { title: "Flatten/Unflatten", url: "/json/flatten", icon: Maximize2 },

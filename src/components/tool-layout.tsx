@@ -278,28 +278,14 @@ export function ToolLayout({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="relative">
-              <div className="min-h-[300px] border rounded-md overflow-auto bg-code-bg">
-                <SyntaxHighlighter
-                  language="json"
-                  style={oneDark}
-                  customStyle={{
-                    margin: 0,
-                    padding: '0.75rem',
-                    background: 'transparent',
-                    fontSize: '0.875rem',
-                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", monospace',
-                    minHeight: '300px',
-                    whiteSpace: wrapLines ? 'pre-wrap' : 'pre',
-                    wordWrap: wrapLines ? 'break-word' : 'normal',
-                  }}
-                  showLineNumbers={false}
-                  wrapLines={wrapLines}
-                >
-                  {outputValue || outputPlaceholder}
-                </SyntaxHighlighter>
-              </div>
-            </div>
+            <CodeEditor
+              value={outputValue}
+              onChange={() => {}} // Read-only
+              placeholder={outputPlaceholder}
+              minHeight={300}
+              wrapLines={wrapLines}
+              readOnly
+            />
           </CardContent>
         </Card>
       </div>

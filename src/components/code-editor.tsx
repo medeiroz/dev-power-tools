@@ -11,6 +11,7 @@ interface CodeEditorProps {
   minHeight?: number;
   language?: string;
   wrapLines?: boolean;
+  readOnly?: boolean;
 }
 
 export function CodeEditor({ 
@@ -19,7 +20,8 @@ export function CodeEditor({
   placeholder, 
   minHeight = 300,
   language = "json",
-  wrapLines = false
+  wrapLines = false,
+  readOnly = false
 }: CodeEditorProps) {
   return (
     <div className="relative">
@@ -30,10 +32,11 @@ export function CodeEditor({
       )}
       <Editor
         value={value}
-        onValueChange={onChange}
+        onValueChange={readOnly ? () => {} : onChange}
         highlight={(code) => Prism.highlight(code, Prism.languages[language] || Prism.languages.json, language)}
         padding={12}
-        className="rounded-md border bg-code-bg font-mono text-sm focus:outline-none"
+        readOnly={readOnly}
+        className={`rounded-md border bg-code-bg font-mono text-sm focus:outline-none ${readOnly ? 'cursor-default' : ''}`}
         style={{
           minHeight,
           fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',

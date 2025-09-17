@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { ToolLayout } from "./tool-layout";
 import { escapeJson, unescapeJson } from "@/lib/json-utils";
 import { useHistory } from "@/hooks/use-history";
@@ -7,42 +7,64 @@ import { useHistory } from "@/hooks/use-history";
 export function JsonEscape() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
-  const [mode, setMode] = useState<"escape" | "unescape">("escape");
   const { addHistoryEntry } = useHistory();
 
-  const handleProcess = () => {
+  const handleEscape = () => {
     if (!input.trim()) {
       setOutput("");
       return;
     }
 
     try {
-      let result;
-      if (mode === "escape") {
-        result = escapeJson(input);
-      } else {
-        result = unescapeJson(input);
-      }
+      const result = escapeJson(input);
       setOutput(result);
       
       addHistoryEntry({
-        tool: "JSON Escape",
-        operation: mode,
+        tool: "JSON Escape/Unescape",
+        operation: "escape",
         input: input,
         output: result,
-        options: { mode }
       });
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       setOutput(`Error: ${errorMsg}`);
       
       addHistoryEntry({
-        tool: "JSON Escape",
-        operation: mode,
+        tool: "JSON Escape/Unescape",
+        operation: "escape",
         input: input,
         output: "",
         error: errorMsg,
-        options: { mode }
+      });
+    }
+  };
+
+  const handleUnescape = () => {
+    if (!input.trim()) {
+      setOutput("");
+      return;
+    }
+
+    try {
+      const result = unescapeJson(input);
+      setOutput(result);
+      
+      addHistoryEntry({
+        tool: "JSON Escape/Unescape",
+        operation: "unescape",
+        input: input,
+        output: result,
+      });
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+      setOutput(`Error: ${errorMsg}`);
+      
+      addHistoryEntry({
+        tool: "JSON Escape/Unescape",
+        operation: "unescape",
+        input: input,
+        output: "",
+        error: errorMsg,
       });
     }
   };
@@ -52,61 +74,28 @@ export function JsonEscape() {
     setOutput("");
   };
 
-  const handleModeChange = (newMode: string) => {
-    setMode(newMode as "escape" | "unescape");
-    // Auto-process when mode changes
-    setTimeout(handleProcess, 0);
-  };
-
   return (
-    <div className="flex-1 space-y-6 p-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          JSON Escape / Unescape
-        </h1>
-        <p className="text-muted-foreground">
-          Escape JSON for embedding in strings or unescape JSON from string format.
-        </p>
+    <ToolLayout
+      title="JSON Escape/Unescape"
+      description="Escape JSON for embedding in strings or unescape JSON from string format."
+      inputValue={input}
+      outputValue={output}
+      onInputChange={setInput}
+      onClear={handleClear}
+      onProcess={handleEscape}
+      processLabel="Escape"
+      inputPlaceholder='{"message": "Hello \"World\"!\nThis is a test."}'
+      outputPlaceholder='Escaped/Unescaped JSON will appear here...'
+      toolName="JSON Escape/Unescape"
+    >
+      <div className="flex gap-2 mt-4 px-6">
+        <Button 
+          onClick={handleUnescape}
+          variant="outline"
+        >
+          Unescape
+        </Button>
       </div>
-
-      <Tabs value={mode} onValueChange={handleModeChange}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="escape">Escape</TabsTrigger>
-          <TabsTrigger value="unescape">Unescape</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="escape">
-          <ToolLayout
-            title=""
-            description=""
-            inputValue={input}
-            outputValue={output}
-            onInputChange={setInput}
-            onClear={handleClear}
-            onProcess={handleProcess}
-            processLabel="Escape"
-            inputPlaceholder='{"message": "Hello \"World\"!\nThis is a test."}'
-            outputPlaceholder='Escaped JSON will appear here...'
-            toolName="JSON Escape"
-          />
-        </TabsContent>
-        
-        <TabsContent value="unescape">
-          <ToolLayout
-            title=""
-            description=""
-            inputValue={input}
-            outputValue={output}
-            onInputChange={setInput}
-            onClear={handleClear}
-            onProcess={handleProcess}
-            processLabel="Unescape"
-            inputPlaceholder='{\"message\": \"Hello \\\"World\\\"!\\nThis is a test.\"}'
-            outputPlaceholder='Unescaped JSON will appear here...'
-            toolName="JSON Escape"
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </ToolLayout>
   );
 }

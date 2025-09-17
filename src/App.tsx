@@ -7,8 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppSidebar } from "@/components/app-sidebar";
 import { JsonBeautify } from "@/components/json-beautify";
 import { JsonMinify } from "@/components/json-minify";
-import { JsonEscapeTool } from "@/components/json-escape-tool";
-import { JsonUnescapeTool } from "@/components/json-unescape-tool";
+import { JsonEscape } from "@/components/json-escape";
 import { JsonGenerator } from "@/components/json-generator";
 import { JsonCompare } from "@/components/json-compare";
 import { JsonFlatten } from "@/components/json-flatten";
@@ -58,8 +57,7 @@ const App = () => (
                   <Route path="/" element={<JsonBeautify />} />
                   <Route path="/json/beautify" element={<JsonBeautify />} />
                   <Route path="/json/minify" element={<JsonMinify />} />
-        <Route path="/json/escape" element={<JsonEscapeTool />} />
-        <Route path="/json/unescape" element={<JsonUnescapeTool />} />
+            <Route path="/json/escape" element={<JsonEscape />} />
                   <Route path="/json/generator" element={<JsonGenerator />} />
                   <Route path="/json/compare" element={<JsonCompare />} />
                   <Route path="/json/flatten" element={<JsonFlatten />} />
