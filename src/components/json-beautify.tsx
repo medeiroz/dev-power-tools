@@ -79,7 +79,7 @@ export function JsonBeautify() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [input, recursive, indent, indentType, wrapLines]);
+  }, [input, recursive, indent, indentType]); // Removed wrapLines from dependencies
 
   const handleClear = () => {
     setInput("");
