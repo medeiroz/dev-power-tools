@@ -36,13 +36,11 @@ export function CodeEditor({
         highlight={(code) => Prism.highlight(code, Prism.languages[language] || Prism.languages.json, language)}
         padding={12}
         readOnly={readOnly}
-        className={`rounded-md border bg-code-bg font-mono text-sm focus:outline-none ${readOnly ? 'cursor-default' : ''}`}
+        className={`code-editor ${wrapLines ? 'is-wrap' : 'is-nowrap'} rounded-md border bg-code-bg font-mono text-sm focus:outline-none ${readOnly ? 'cursor-default' : ''} overflow-auto`}
         style={{
           minHeight,
           fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
           lineHeight: 1.4,
-          whiteSpace: wrapLines ? "pre-wrap" : "pre",
-          wordWrap: wrapLines ? "break-word" : "normal",
         }}
       />
     </div>
