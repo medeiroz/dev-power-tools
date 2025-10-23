@@ -90,12 +90,6 @@ export function JsonEscape() {
     >
       <div className="flex gap-2 mt-4 px-6">
         <Button 
-          onClick={handleUnescape}
-          variant="outline"
-        >
-          Unescape
-        </Button>
-        <Button 
           onClick={handleEscape}
         >
           Escape
