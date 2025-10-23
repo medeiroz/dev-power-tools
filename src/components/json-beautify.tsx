@@ -13,7 +13,7 @@ export function JsonBeautify() {
   const [recursive, setRecursive] = useState(true);
   const [indent, setIndent] = useState([2]);
   const [indentType, setIndentType] = useState<'space' | 'tab'>('space');
-  const [wrapLines, setWrapLines] = useState(false);
+  const [wrapLines, setWrapLines] = useState(true);
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [error, setError] = useState("");
   const { addHistoryEntry } = useHistory();

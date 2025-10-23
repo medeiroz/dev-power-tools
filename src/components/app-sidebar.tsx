@@ -146,6 +146,30 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Developer Utilities */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/80">
+            {!isCollapsed && "Dev Utilities"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {utilities.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) => getNavClassName(isActive)}
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* Generators */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/80">
@@ -178,30 +202,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {validators.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) => getNavClassName(isActive)}
-                    >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      {!isCollapsed && <span className="ml-2">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Developer Utilities */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/80">
-            {!isCollapsed && "Dev Utilities"}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {utilities.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink

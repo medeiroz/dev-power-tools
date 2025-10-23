@@ -82,8 +82,8 @@ export function JsonEscape() {
       outputValue={output}
       onInputChange={setInput}
       onClear={handleClear}
-      onProcess={handleEscape}
-      processLabel="Escape"
+      onProcess={handleUnescape}
+      processLabel="Unescape"
       inputPlaceholder='{"message": "Hello \"World\"!\nThis is a test."}'
       outputPlaceholder='Escaped/Unescaped JSON will appear here...'
       toolName="JSON Escape/Unescape"
@@ -94,6 +94,11 @@ export function JsonEscape() {
           variant="outline"
         >
           Unescape
+        </Button>
+        <Button 
+          onClick={handleEscape}
+        >
+          Escape
         </Button>
       </div>
     </ToolLayout>
