@@ -80,6 +80,9 @@ const App = () => (
                   {/* Utilities */}
                   <Route path="/utils/jwt" element={<JWTDecoder />} />
                   <Route path="/utils/base64" element={<Base64Converter />} />
+                  <Route path="/utils/url" element={<UrlEncoder />} />
+                  <Route path="/utils/hash" element={<HashGenerator />} />
+                  <Route path="/utils/timestamp" element={<TimestampConverter />} />
                   <Route path="/utilities/url-encoder" element={<UrlEncoder />} />
                   <Route path="/utilities/hash-generator" element={<HashGenerator />} />
                   <Route path="/utilities/timestamp-converter" element={<TimestampConverter />} />

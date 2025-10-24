@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Download, Trash2 } from "lucide-react";
+import { Copy, Download, Trash2, ArrowLeftRight, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CodeEditor } from "@/components/code-editor";
 import { escapeJson, unescapeJson } from "@/lib/json-utils";
@@ -13,6 +13,7 @@ import { createToastHelper } from "@/lib/toast-utils";
 export function JsonEscape() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
   const { addHistoryEntry } = useHistory();
   const { toast } = useToast();
   const toastHelper = createToastHelper(toast);
@@ -20,12 +21,14 @@ export function JsonEscape() {
   const handleEscape = () => {
     if (!input.trim()) {
       setOutput("");
+      setError("");
       return;
     }
 
     try {
       const result = escapeJson(input);
       setOutput(result);
+      setError("");
       
       addHistoryEntry({
         tool: "JSON Escape/Unescape",
@@ -35,7 +38,8 @@ export function JsonEscape() {
       });
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      setOutput(`Error: ${errorMsg}`);
+      setOutput("");
+      setError(errorMsg);
       
       addHistoryEntry({
         tool: "JSON Escape/Unescape",
@@ -50,12 +54,14 @@ export function JsonEscape() {
   const handleUnescape = () => {
     if (!input.trim()) {
       setOutput("");
+      setError("");
       return;
     }
 
     try {
       const result = unescapeJson(input);
       setOutput(result);
+      setError("");
       
       addHistoryEntry({
         tool: "JSON Escape/Unescape",
@@ -65,7 +71,8 @@ export function JsonEscape() {
       });
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      setOutput(`Error: ${errorMsg}`);
+      setOutput("");
+      setError(errorMsg);
       
       addHistoryEntry({
         tool: "JSON Escape/Unescape",
@@ -80,6 +87,21 @@ export function JsonEscape() {
   const handleClear = () => {
     setInput("");
     setOutput("");
+    setError("");
+  };
+
+  const handleClearOutput = () => {
+    setOutput("");
+    setError("");
+  };
+
+  const handleSwapContent = () => {
+    if (output.trim()) {
+      const temp = input;
+      setInput(output);
+      setOutput(temp);
+      setError("");
+    }
   };
 
   const handleCopyToClipboard = async (text: string, label: string) => {
@@ -112,12 +134,17 @@ export function JsonEscape() {
         <p className="text-muted-foreground">
           Escape JSON for embedding in strings or unescape JSON from string format.
         </p>
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+            <p className="text-destructive text-sm font-mono">{error}</p>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Input */}
-        <Card className="h-fit">
+        <Card className="h-fit w-full lg:flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-sm font-medium">Input</CardTitle>
             <div className="flex gap-2">
@@ -125,20 +152,20 @@ export function JsonEscape() {
                 variant="ghost"
                 size="sm"
                 onClick={handleClear}
+                disabled={!input && !output}
                 className="h-8 px-2"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
-              {input && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCopyToClipboard(input, "Input")}
-                  className="h-8 px-2"
-                >
-                  <Copy className="h-3 w-3" />
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleCopyToClipboard(input, "Input")}
+                disabled={!input}
+                className="h-8 px-2"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -165,31 +192,55 @@ export function JsonEscape() {
           </CardContent>
         </Card>
 
+        {/* Swap Button - Between cards */}
+        <div className="flex justify-center items-center lg:mt-20 w-full lg:w-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSwapContent}
+            disabled={!output.trim()}
+            className="h-10 w-10 rounded-full p-0 bg-background border-2 shadow-sm hover:shadow-md transition-all"
+            title="Swap input and output"
+          >
+            {/* Desktop icon */}
+            <ArrowLeftRight className="h-4 w-4 hidden lg:block" />
+            {/* Mobile icon */}
+            <ArrowUpDown className="h-4 w-4 lg:hidden" />
+          </Button>
+        </div>
+
         {/* Output */}
-        <Card className="h-fit">
+        <Card className="h-fit w-full lg:flex-1">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-sm font-medium">Output</CardTitle>
             <div className="flex gap-2">
-              {output && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCopyToClipboard(output, "Output")}
-                    className="h-8 px-2"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDownloadAsFile(output, "escaped-json.txt")}
-                    className="h-8 px-2"
-                  >
-                    <Download className="h-3 w-3" />
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearOutput}
+                disabled={!output}
+                className="h-8 px-2"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleCopyToClipboard(output, "Output")}
+                disabled={!output}
+                className="h-8 px-2"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDownloadAsFile(output, "escaped-json.txt")}
+                disabled={!output}
+                className="h-8 px-2"
+              >
+                <Download className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
