@@ -166,18 +166,55 @@ function recursiveJsonParse(obj: any): any {
 }
 
 /**
- * Flatten JSON object using dot notation
+ * Flatten JSON object with dot notation
  */
-export function flattenJson(obj: any, prefix = ''): Record<string, any> {
+export function flattenJson(obj: any, prefix = ''): any {
+  // Handle primitive values at root level (string, number, boolean, null)
+  if (obj === null || typeof obj !== 'object') {
+    // If there's no prefix, return the value directly
+    if (!prefix) {
+      return obj;
+    }
+    // If there's a prefix, return as key-value pair
+    return { [prefix]: obj };
+  }
+  
   const flattened: Record<string, any> = {};
   
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      const newKey = prefix ? `${prefix}.${i}` : `${i}`;
+      
+      if (obj[i] !== null && typeof obj[i] === 'object') {
+        Object.assign(flattened, flattenJson(obj[i], newKey));
+      } else {
+        flattened[newKey] = obj[i];
+      }
+    }
+    return flattened;
+  }
+  
+  // Handle objects
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
       const newKey = prefix ? `${prefix}.${key}` : key;
       
-      if (obj[key] !== null && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+      if (Array.isArray(obj[key])) {
+        // Handle arrays
+        for (let i = 0; i < obj[key].length; i++) {
+          const arrayKey = `${newKey}.${i}`;
+          if (obj[key][i] !== null && typeof obj[key][i] === 'object') {
+            Object.assign(flattened, flattenJson(obj[key][i], arrayKey));
+          } else {
+            flattened[arrayKey] = obj[key][i];
+          }
+        }
+      } else if (obj[key] !== null && typeof obj[key] === 'object') {
+        // Handle nested objects
         Object.assign(flattened, flattenJson(obj[key], newKey));
       } else {
+        // Handle primitive values
         flattened[newKey] = obj[key];
       }
     }
@@ -189,9 +226,58 @@ export function flattenJson(obj: any, prefix = ''): Record<string, any> {
 /**
  * Unflatten JSON object from dot notation
  */
-export function unflattenJson(flatObj: Record<string, any>): any {
+export function unflattenJson(flatObj: any): any {
+  // Handle primitive values (already flattened values)
+  if (flatObj === null || typeof flatObj !== 'object' || Array.isArray(flatObj)) {
+    return flatObj;
+  }
+  
+  // Check if it's an empty object
+  const keys = Object.keys(flatObj);
+  if (keys.length === 0) {
+    return {};
+  }
+  
   const result: any = {};
   
+  // Check if all keys are numeric indices (indicating a root array)
+  const allKeysAreIndices = keys.every(key => {
+    const firstPart = key.split('.')[0];
+    return /^\d+$/.test(firstPart);
+  });
+  
+  if (allKeysAreIndices) {
+    // Handle root array case
+    const rootArray: any[] = [];
+    for (const key in flatObj) {
+      const keys = key.split('.');
+      let current: any = rootArray;
+      
+      for (let i = 0; i < keys.length - 1; i++) {
+        const currentKey = keys[i];
+        const nextKey = keys[i + 1];
+        const index = parseInt(currentKey, 10);
+        
+        if (!current[index]) {
+          // Check if next key is a number (array index)
+          const isArrayIndex = /^\d+$/.test(nextKey);
+          current[index] = isArrayIndex ? [] : {};
+        }
+        current = current[index];
+      }
+      
+      const lastKey = keys[keys.length - 1];
+      if (/^\d+$/.test(lastKey)) {
+        const index = parseInt(lastKey, 10);
+        current[index] = flatObj[key];
+      } else {
+        current[lastKey] = flatObj[key];
+      }
+    }
+    return rootArray;
+  }
+  
+  // Handle regular object case
   for (const key in flatObj) {
     const keys = key.split('.');
     let current = result;

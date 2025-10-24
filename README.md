@@ -1,54 +1,110 @@
-# Welcome to your Lovable project
+# 🔧 Dev Power Tools
 
-## Project info
+**Essential tools for developers**
 
-**URL**: https://lovable.dev/projects/4a20110f-39b1-476c-812c-26ac679de945
+A complete suite of web utilities for developers, with special focus on Brazilian market functionalities.
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+### 📄 JSON Tools
+- **JSON Beautify/Minify**: Format and compact JSON
+- **JSON Compare**: Compare two JSONs with visual diff
+- **JSON Escape/Unescape**: Escape and unescape JSON strings
+- **JSON Flatten/Unflatten**: Convert between nested JSON and dot notation
+- **JSON Generator**: Random JSON generation for testing
 
-**Use Lovable**
+### 🇧🇷 Brazilian Validators and Generators
+- **CPF**: Generation and validation with formatting
+- **CNPJ**: Generation and validation with formatting
+- **RG**: Generation with formatting
+- **CEP**: Generation and validation with formatting
+- **Phone**: Generation and validation (landline and mobile)
+- **License Plates**: Support for Mercosul and old formats
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4a20110f-39b1-476c-812c-26ac679de945) and start prompting.
+### 🛠️ Developer Utilities
+- **Password Generator**: Secure passwords with customizable options
+- **UUID Generator**: Unique UUIDs for development
+- **Hash Generator**: MD5, SHA-1, SHA-256, SHA-512
+- **Base64 Converter**: Encoding and decoding
+- **URL Encoder/Decoder**: URL encoding
+- **JWT Decoder**: JWT token decoding
+- **Timestamp Converter**: Date/time format conversion
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🏗️ Technologies
 
-**Use your preferred IDE**
+- **React 18** with TypeScript
+- **Vite** for build and development
+- **Tailwind CSS** for styling
+- **Shadcn/UI** for components
+- **Jest** for unit testing (163+ tests)
+- **React Router** for navigation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📦 Installation and Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# Clone the repository
+git clone https://github.com/medeiroz/dev-power-tools.git
 
-Follow these steps:
+# Navigate to the directory
+cd dev-power-tools
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Install dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Run the development server
 npm run dev
+
+# Run tests
+npm test
+
+# Build for production
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## 🧪 Tests
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Run all tests
+npm test
 
-**Use GitHub Codespaces**
+# Run tests with watch mode
+npm run test:watch
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Run tests with coverage
+npm run test:coverage
+```
+
+## 🎯 Features
+
+- ✅ **Responsive**: Mobile and desktop adaptive interface
+- ✅ **Accessible**: Components with screen reader support
+- ✅ **Performant**: Optimized build with Vite
+- ✅ **Tested**: Complete test coverage
+- ✅ **Typed**: TypeScript throughout the project
+- ✅ **Modular**: Well-organized architecture
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -m 'Add: new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is under the MIT license. See the [LICENSE](LICENSE) file for more details.
+
+## 🔗 Links
+
+- [GitHub Repository](https://github.com/medeiroz/dev-power-tools)
+- [Online Demo](https://tools.medeiroz.com/)
+
+---
+
+**Made with ❤️ for the developer community**
 
 ## What technologies are used for this project?
 
@@ -59,15 +115,3 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/4a20110f-39b1-476c-812c-26ac679de945) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

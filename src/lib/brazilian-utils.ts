@@ -28,12 +28,12 @@ export function validateCPF(cpf: string): { valid: boolean; error?: string } {
   const cleaned = cpf.replace(/\D/g, '');
   
   if (cleaned.length !== 11) {
-    return { valid: false, error: 'CPF deve ter 11 dígitos' };
+    return { valid: false, error: 'CPF must have 11 digits' };
   }
   
   // Check for invalid sequences
   if (/^(\d)\1{10}$/.test(cleaned)) {
-    return { valid: false, error: 'CPF não pode ter todos os dígitos iguais' };
+    return { valid: false, error: 'CPF cannot have all equal digits' };
   }
   
   const digits = cleaned.split('').map(Number);
@@ -46,7 +46,7 @@ export function validateCPF(cpf: string): { valid: boolean; error?: string } {
   const firstCheck = ((sum * 10) % 11) % 10;
   
   if (firstCheck !== digits[9]) {
-    return { valid: false, error: 'Primeiro dígito verificador inválido' };
+    return { valid: false, error: 'First check digit is invalid' };
   }
   
   // Validate second check digit
@@ -58,7 +58,7 @@ export function validateCPF(cpf: string): { valid: boolean; error?: string } {
   const secondCheck = ((sum * 10) % 11) % 10;
   
   if (secondCheck !== digits[10]) {
-    return { valid: false, error: 'Segundo dígito verificador inválido' };
+    return { valid: false, error: 'Second check digit is invalid' };
   }
   
   return { valid: true };
@@ -102,12 +102,12 @@ export function validateCNPJ(cnpj: string): { valid: boolean; error?: string } {
   const cleaned = cnpj.replace(/\D/g, '');
   
   if (cleaned.length !== 14) {
-    return { valid: false, error: 'CNPJ deve ter 14 dígitos' };
+    return { valid: false, error: 'CNPJ must have 14 digits' };
   }
   
   // Check for invalid sequences
   if (/^(\d)\1{13}$/.test(cleaned)) {
-    return { valid: false, error: 'CNPJ não pode ter todos os dígitos iguais' };
+    return { valid: false, error: 'CNPJ cannot have all equal digits' };
   }
   
   const digits = cleaned.split('').map(Number);
@@ -121,7 +121,7 @@ export function validateCNPJ(cnpj: string): { valid: boolean; error?: string } {
   const firstCheck = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   
   if (firstCheck !== digits[12]) {
-    return { valid: false, error: 'Primeiro dígito verificador inválido' };
+    return { valid: false, error: 'First check digit is invalid' };
   }
   
   // Validate second check digit
@@ -134,7 +134,7 @@ export function validateCNPJ(cnpj: string): { valid: boolean; error?: string } {
   const secondCheck = sum % 11 < 2 ? 0 : 11 - (sum % 11);
   
   if (secondCheck !== digits[13]) {
-    return { valid: false, error: 'Segundo dígito verificador inválido' };
+    return { valid: false, error: 'Second check digit is invalid' };
   }
   
   return { valid: true };
@@ -158,11 +158,11 @@ export function validateCEP(cep: string): { valid: boolean; error?: string } {
   const cleaned = cep.replace(/\D/g, '');
   
   if (cleaned.length !== 8) {
-    return { valid: false, error: 'CEP deve ter 8 dígitos' };
+    return { valid: false, error: 'CEP must have 8 digits' };
   }
   
   if (!/^\d{8}$/.test(cleaned)) {
-    return { valid: false, error: 'CEP deve conter apenas números' };
+    return { valid: false, error: 'CEP must contain only numbers' };
   }
   
   return { valid: true };
@@ -200,18 +200,18 @@ export function validatePhone(phone: string): { valid: boolean; error?: string }
   const cleaned = phone.replace(/\D/g, '');
   
   if (cleaned.length !== 10 && cleaned.length !== 11) {
-    return { valid: false, error: 'Telefone deve ter 10 ou 11 dígitos' };
+    return { valid: false, error: 'Phone must have 10 or 11 digits' };
   }
   
   const ddd = parseInt(cleaned.substring(0, 2));
   if (ddd < 11 || ddd > 99) {
-    return { valid: false, error: 'DDD inválido (deve estar entre 11 e 99)' };
+    return { valid: false, error: 'Invalid area code (must be between 11 and 99)' };
   }
   
   if (cleaned.length === 11) {
     const firstDigit = parseInt(cleaned[2]);
     if (firstDigit < 5 || firstDigit > 9) {
-      return { valid: false, error: 'Celular deve começar com 5, 6, 7, 8 ou 9' };
+      return { valid: false, error: 'Mobile number must start with 5, 6, 7, 8 or 9' };
     }
   }
   
@@ -235,14 +235,14 @@ export function formatRG(rg: string): string {
 // Brazilian license plate utilities
 export function generateLicensePlate(mercosul: boolean = true): string {
   if (mercosul) {
-    // Padrão Mercosul: ABC1D23
+    // Mercosul pattern: ABC1D23
     const letters1 = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
     const number1 = Math.floor(Math.random() * 10);
     const letter2 = String.fromCharCode(65 + Math.floor(Math.random() * 26));
     const numbers2 = Array.from({ length: 2 }, () => Math.floor(Math.random() * 10)).join('');
     return `${letters1}${number1}${letter2}${numbers2}`;
   } else {
-    // Padrão antigo: ABC-1234
+    // Old pattern: ABC-1234
     const letters = Array.from({ length: 3 }, () => String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
     const numbers = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join('');
     return `${letters}-${numbers}`;
@@ -252,17 +252,17 @@ export function generateLicensePlate(mercosul: boolean = true): string {
 export function validateLicensePlate(plate: string): { valid: boolean; error?: string; type?: 'mercosul' | 'antiga' } {
   const cleaned = plate.replace(/[^A-Z0-9]/gi, '').toUpperCase();
   
-  // Padrão Mercosul: ABC1D23
+  // Mercosul pattern: ABC1D23
   const mercosulPattern = /^[A-Z]{3}\d[A-Z]\d{2}$/;
   if (mercosulPattern.test(cleaned)) {
     return { valid: true, type: 'mercosul' };
   }
   
-  // Padrão antigo: ABC1234
+  // Old pattern: ABC1234
   const oldPattern = /^[A-Z]{3}\d{4}$/;
   if (oldPattern.test(cleaned)) {
     return { valid: true, type: 'antiga' };
   }
   
-  return { valid: false, error: 'Placa deve seguir o padrão ABC1234 ou ABC1D23' };
+  return { valid: false, error: 'License plate must follow the pattern ABC1234 or ABC1D23' };
 }

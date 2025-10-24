@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  
+  <!-- Code brackets -->
+  <path d="M18 22L12 32L18 42" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M46 22L52 32L46 42" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Center gear/tools icon -->
+  <circle cx="32" cy="32" r="8" fill="none" stroke="white" stroke-width="2"/>
+  <path d="M32 24V20M32 44V40M40 32H44M20 32H24" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <path d="M37.66 26.34L40.08 23.92M23.92 40.08L26.34 37.66M37.66 37.66L40.08 40.08M23.92 23.92L26.34 26.34" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="3" fill="white"/>
+</svg>
