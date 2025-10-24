@@ -46,7 +46,7 @@ export function ToolLayout({
   outputPlaceholder = "Output will appear here...",
   options,
   toolName,
-  wrapLines = false,
+  wrapLines = true,
   outputRef,
 }: ToolLayoutProps) {
   const { toast } = useToast();

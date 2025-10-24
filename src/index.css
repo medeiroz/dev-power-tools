@@ -157,8 +157,6 @@
 /* Code editor wrap control */
 .code-editor.is-wrap pre,
 .code-editor.is-wrap code,
-.code-editor.is-wrap pre[class*="language-"],
-.code-editor.is-wrap code[class*="language-"],
 .code-editor.is-wrap textarea {
   white-space: pre-wrap !important;
   word-break: break-word;
@@ -167,8 +165,7 @@
 
 .code-editor.is-nowrap pre,
 .code-editor.is-nowrap code,
-.code-editor.is-nowrap pre[class*="language-"],
-.code-editor.is-nowrap code[class*="language-"],
 .code-editor.is-nowrap textarea {
   white-space: pre !important;
 }
+
