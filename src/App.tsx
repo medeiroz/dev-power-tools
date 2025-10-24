@@ -47,7 +47,7 @@ const App = () => (
                 <SidebarTrigger className="lg:hidden" />
                 <div className="hidden lg:block" />
                 <div className="text-sm text-muted-foreground font-mono">
-                  DevTools v1.0
+                  DevTools v1.1
                 </div>
               </header>
               

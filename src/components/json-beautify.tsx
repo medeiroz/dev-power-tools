@@ -103,7 +103,7 @@ export function JsonBeautify() {
       
       <div className="space-y-3">
         <Label className="text-sm">Indentation Type</Label>
-        <RadioGroup value={indentType} onValueChange={(value: 'space' | 'tab') => setIndentType(value)}>
+        <RadioGroup value={indentType} onValueChange={(value: 'space' | 'tab') => setIndentType(value)} className="flex flex-row space-x-6">
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="space" id="space" />
             <Label htmlFor="space" className="text-sm">Spaces</Label>
