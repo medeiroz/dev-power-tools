@@ -155,12 +155,18 @@
 }
 
 /* Code editor wrap control */
+.code-editor.is-wrap {
+  overflow-x: hidden !important;
+  max-width: 100%;
+}
+
 .code-editor.is-wrap pre,
 .code-editor.is-wrap code,
 .code-editor.is-wrap textarea {
   white-space: pre-wrap !important;
   word-break: break-word;
   overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .code-editor.is-nowrap pre,
