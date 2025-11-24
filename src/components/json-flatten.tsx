@@ -218,7 +218,7 @@ export function JsonFlatten() {
 }`}
               minHeight={300}
               language="json"
-              wrapLines={false}
+              wrapLines={true}
             />
             <div className="flex gap-2 mt-4">
               <Button 
@@ -294,7 +294,7 @@ export function JsonFlatten() {
               placeholder="Flattened/Unflattened JSON will appear here..."
               minHeight={300}
               language="json"
-              wrapLines={false}
+              wrapLines={true}
               readOnly
             />
           </CardContent>
