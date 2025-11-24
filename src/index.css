@@ -155,11 +155,17 @@
 }
 
 /* Code editor wrap control */
-.code-editor.is-wrap {
-  overflow-x: hidden !important;
+.code-editor {
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
+.code-editor.is-wrap {
+  overflow-x: hidden !important;
+}
+
+.code-editor.is-wrap > *,
 .code-editor.is-wrap pre,
 .code-editor.is-wrap code,
 .code-editor.is-wrap textarea {
@@ -167,6 +173,12 @@
   word-break: break-word;
   overflow-wrap: anywhere;
   max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.code-editor.is-nowrap {
+  overflow-x: auto !important;
 }
 
 .code-editor.is-nowrap pre,
