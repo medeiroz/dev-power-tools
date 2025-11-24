@@ -27,6 +27,7 @@ import { CNPJValidator } from "@/components/validators/cnpj-validator";
 import { EmailValidator } from "@/components/validators/email-validator";
 import { JWTDecoder } from "@/components/utilities/jwt-decoder";
 import { Base64Converter } from "@/components/utilities/base64-converter";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import NotFound from "@/pages/NotFound";
 import { History } from "@/components/history";
 
@@ -83,6 +84,7 @@ const App = () => (
                   <Route path="/utils/url" element={<UrlEncoder />} />
                   <Route path="/utils/hash" element={<HashGenerator />} />
                   <Route path="/utils/timestamp" element={<TimestampConverter />} />
+                  <Route path="/utils/markdown" element={<MarkdownEditor />} />
                   <Route path="/utilities/url-encoder" element={<UrlEncoder />} />
                   <Route path="/utilities/hash-generator" element={<HashGenerator />} />
                   <Route path="/utilities/timestamp-converter" element={<TimestampConverter />} />
