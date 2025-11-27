@@ -279,7 +279,7 @@ export function JsonEscape() {
 
       {/* Expanded Input Dialog */}
       <Dialog open={expandedInput} onOpenChange={setExpandedInput}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col">
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Input - Maximized</span>
@@ -318,7 +318,7 @@ export function JsonEscape() {
 
       {/* Expanded Output Dialog */}
       <Dialog open={expandedOutput} onOpenChange={setExpandedOutput}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col">
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>Output - Maximized</span>
