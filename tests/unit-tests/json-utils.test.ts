@@ -202,6 +202,15 @@ describe('json-utils', () => {
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
     });
+
+    test('should automatically unescape escaped JSON strings', () => {
+      const input = '[\\n  {\\n    \\"key_0\\": false,\\n    \\"key_1\\": true\\n  }\\n]';
+      const result = beautifyJson(input);
+      
+      expect(result.success).toBe(true);
+      expect(result.data).toContain('"key_0": false');
+      expect(result.data).toContain('"key_1": true');
+    });
   });
 
   describe('minifyJson', () => {
