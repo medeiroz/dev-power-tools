@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Copy, ArrowLeftRight, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CodeEditor } from "@/components/code-editor";
 import { compareJson } from "@/lib/json-utils";
 import { useHistory } from "@/hooks/use-history";
 
@@ -164,11 +164,13 @@ export function JsonCompare() {
             </div>
           </CardHeader>
           <CardContent>
-            <Textarea
+            <CodeEditor
               value={input1}
-              onChange={(e) => setInput1(e.target.value)}
+              onChange={setInput1}
               placeholder='{"name": "John", "age": 30}'
-              className="min-h-[200px] font-mono text-sm bg-code-bg resize-none"
+              minHeight={200}
+              language="json"
+              wrapLines={true}
             />
           </CardContent>
         </Card>
@@ -199,11 +201,13 @@ export function JsonCompare() {
             </div>
           </CardHeader>
           <CardContent>
-            <Textarea
+            <CodeEditor
               value={input2}
-              onChange={(e) => setInput2(e.target.value)}
+              onChange={setInput2}
               placeholder='{"name": "Jane", "age": 25, "city": "NYC"}'
-              className="min-h-[200px] font-mono text-sm bg-code-bg resize-none"
+              minHeight={200}
+              language="json"
+              wrapLines={true}
             />
           </CardContent>
         </Card>
