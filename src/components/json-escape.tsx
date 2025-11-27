@@ -174,7 +174,7 @@ export function JsonEscape() {
               onChange={setInput}
               placeholder='{"message": "Hello \"World\"!\nThis is a test."}'
               minHeight={300}
-              wrapLines={false}
+              wrapLines={true}
             />
             <div className="flex gap-2 mt-4">
               <Button 
@@ -249,7 +249,7 @@ export function JsonEscape() {
               onChange={() => {}} // Read-only
               placeholder="Escaped/Unescaped JSON will appear here..."
               minHeight={300}
-              wrapLines={false}
+              wrapLines={true}
               readOnly
             />
           </CardContent>
