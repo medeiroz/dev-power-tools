@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Copy, ArrowLeftRight, CheckCircle, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Copy, ArrowLeftRight, CheckCircle, AlertCircle, Maximize2, Minimize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CodeEditor } from "@/components/code-editor";
 import { compareJson } from "@/lib/json-utils";
@@ -14,6 +15,8 @@ export function JsonCompare() {
   const [differences, setDifferences] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
+  const [expandedInput1, setExpandedInput1] = useState(false);
+  const [expandedInput2, setExpandedInput2] = useState(false);
   const { toast } = useToast();
   const { addHistoryEntry } = useHistory();
 
@@ -161,6 +164,15 @@ export function JsonCompare() {
                   <Copy className="h-3 w-3" />
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedInput1(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -198,6 +210,15 @@ export function JsonCompare() {
                   <Copy className="h-3 w-3" />
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedInput2(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -290,6 +311,86 @@ export function JsonCompare() {
           </CardContent>
         </Card>
       )}
+
+      {/* Expanded Input1 Dialog */}
+      <Dialog open={expandedInput1} onOpenChange={setExpandedInput1}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>First JSON - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(input1, "First JSON")}
+                  disabled={!input1}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedInput1(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={input1}
+              onChange={setInput1}
+              placeholder='{"name": "John", "age": 30}'
+              minHeight={600}
+              language="json"
+              wrapLines={true}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expanded Input2 Dialog */}
+      <Dialog open={expandedInput2} onOpenChange={setExpandedInput2}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Second JSON - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(input2, "Second JSON")}
+                  disabled={!input2}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedInput2(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={input2}
+              onChange={setInput2}
+              placeholder='{"name": "Jane", "age": 25, "city": "NYC"}'
+              minHeight={600}
+              language="json"
+              wrapLines={true}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

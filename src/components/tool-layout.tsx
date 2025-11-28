@@ -1,9 +1,9 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Copy, Download, Trash2, CheckCircle, AlertCircle, History, Clock } from "lucide-react";
+import { Copy, Download, Trash2, CheckCircle, AlertCircle, History, Clock, Maximize2, Minimize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useHistory } from "@/hooks/use-history";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -51,6 +51,8 @@ export function ToolLayout({
 }: ToolLayoutProps) {
   const { toast } = useToast();
   const { getHistoryByTool } = useHistory();
+  const [expandedInput, setExpandedInput] = useState(false);
+  const [expandedOutput, setExpandedOutput] = useState(false);
   
   const toolHistory = toolName ? getHistoryByTool(toolName) : [];
 
@@ -156,6 +158,15 @@ export function ToolLayout({
                   <Copy className="h-3 w-3" />
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedInput(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -275,6 +286,15 @@ export function ToolLayout({
                   </Button>
                 </>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedOutput(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -291,6 +311,94 @@ export function ToolLayout({
       </div>
 
       {children}
+
+      {/* Expanded Input Dialog */}
+      <Dialog open={expandedInput} onOpenChange={setExpandedInput}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Input - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(inputValue, "Input")}
+                  disabled={!inputValue}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedInput(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={inputValue}
+              onChange={onInputChange}
+              placeholder={inputPlaceholder}
+              minHeight={600}
+              wrapLines={wrapLines}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expanded Output Dialog */}
+      <Dialog open={expandedOutput} onOpenChange={setExpandedOutput}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Output - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(outputValue, "Output")}
+                  disabled={!outputValue}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => downloadAsFile(outputValue, `output.json`)}
+                  disabled={!outputValue}
+                  className="h-8 px-2"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedOutput(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={outputValue}
+              onChange={() => {}}
+              placeholder={outputPlaceholder}
+              minHeight={600}
+              wrapLines={wrapLines}
+              readOnly
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
