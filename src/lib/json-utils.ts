@@ -94,12 +94,9 @@ export function minifyJson(input: string): JsonParseResult {
  * Escape JSON for embedding in strings
  */
 export function escapeJson(input: string): string {
-  return input
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t');
+  // Use JSON.stringify to properly escape the string
+  // Remove the outer quotes added by stringify
+  return JSON.stringify(input).slice(1, -1);
 }
 
 /**
