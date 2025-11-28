@@ -35,19 +35,19 @@ export function safeJsonParse(jsonString: string): JsonParseResult {
 export function beautifyJson(input: string, options: JsonFormatOptions = {}): JsonParseResult {
   const { indent = 2, recursive = false, indentType = 'space' } = options;
   
-  // Check if input is an escaped JSON string (contains \n, \", etc.)
-  let processedInput = input;
-  if (/\\[nrt"\\]/.test(input)) {
+  // Try to parse directly first
+  let parseResult = safeJsonParse(input);
+  
+  // If parsing fails, try unescaping and parsing again
+  if (!parseResult.success) {
     try {
-      // Try to unescape first
-      processedInput = unescapeJson(input);
+      const unescapedInput = unescapeJson(input);
+      parseResult = safeJsonParse(unescapedInput);
     } catch {
-      // If unescape fails, use original input
-      processedInput = input;
+      // If unescape fails, return the original parse error
     }
   }
   
-  const parseResult = safeJsonParse(processedInput);
   if (!parseResult.success) {
     return parseResult;
   }
