@@ -106,7 +106,14 @@ export function escapeJson(input: string): string {
  * Unescape JSON from string format
  */
 export function unescapeJson(input: string): string {
-  return input
+  let processedInput = input.trim();
+  
+  // If the input is wrapped in quotes, remove them first
+  if (processedInput.startsWith('"') && processedInput.endsWith('"')) {
+    processedInput = processedInput.slice(1, -1);
+  }
+  
+  return processedInput
     .replace(/\\\\/g, '\\')
     .replace(/\\"/g, '"')
     .replace(/\\n/g, '\n')
