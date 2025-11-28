@@ -106,14 +106,19 @@ export function escapeJson(input: string): string {
  * Unescape JSON from string format
  */
 export function unescapeJson(input: string): string {
-  let processedInput = input.trim();
+  const trimmed = input.trim();
   
-  // If the input is wrapped in quotes, remove them first
-  if (processedInput.startsWith('"') && processedInput.endsWith('"')) {
-    processedInput = processedInput.slice(1, -1);
+  // If the input is a JSON string (wrapped in quotes), parse it
+  if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      // If parse fails, fall back to manual unescape
+    }
   }
   
-  return processedInput
+  // Manual unescape for non-quoted strings
+  return trimmed
     .replace(/\\\\/g, '\\')
     .replace(/\\"/g, '"')
     .replace(/\\n/g, '\n')
