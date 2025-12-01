@@ -3,16 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Copy, Download, Shuffle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Copy, Download, Shuffle, Maximize2, Minimize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateRandomJson } from "@/lib/json-utils";
+import { CodeEditor } from "@/components/code-editor";
 
 export function JsonGenerator() {
   const [output, setOutput] = useState("");
   const [depth, setDepth] = useState([3]);
   const [arrayLength, setArrayLength] = useState([5]);
   const [objectKeys, setObjectKeys] = useState([5]);
+  const [expandedOutput, setExpandedOutput] = useState(false);
   const { toast } = useToast();
 
   const handleGenerate = () => {
@@ -144,20 +146,82 @@ export function JsonGenerator() {
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setExpandedOutput(true)}
+                    className="h-8 px-2"
+                    title="Maximize"
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                  </Button>
                 </>
               )}
             </div>
           </CardHeader>
           <CardContent>
-            <Textarea
+            <CodeEditor
               value={output}
-              readOnly
+              onChange={() => {}} // Read-only
               placeholder="Click 'Generate Random JSON' to create test data..."
-              className="min-h-[400px] font-mono text-sm bg-code-bg resize-none"
+              minHeight={400}
+              language="json"
+              wrapLines={true}
+              readOnly
             />
           </CardContent>
         </Card>
       </div>
+
+      {/* Expanded Output Dialog */}
+      <Dialog open={expandedOutput} onOpenChange={setExpandedOutput}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Generated JSON - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(output)}
+                  disabled={!output}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => downloadAsFile(output)}
+                  disabled={!output}
+                  className="h-8 px-2"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedOutput(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={output}
+              onChange={() => {}}
+              placeholder="Click 'Generate Random JSON' to create test data..."
+              minHeight={600}
+              language="json"
+              wrapLines={true}
+              readOnly
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
