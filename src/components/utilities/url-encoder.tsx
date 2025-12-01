@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Download, Trash2, ArrowLeftRight, ArrowUpDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Copy, Download, Trash2, ArrowLeftRight, ArrowUpDown, Maximize2, Minimize2 } from "lucide-react";
 import { useHistory } from "@/hooks/use-history";
 import { useToast } from "@/hooks/use-toast";
 import { copyToClipboard } from "@/lib/clipboard-utils";
@@ -13,6 +14,8 @@ export function UrlEncoder() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
+  const [expandedInput, setExpandedInput] = useState(false);
+  const [expandedOutput, setExpandedOutput] = useState(false);
   const { addHistoryEntry } = useHistory();
   const { toast } = useToast();
   const toastHelper = createToastHelper(toast);
@@ -165,6 +168,15 @@ export function UrlEncoder() {
               >
                 <Copy className="h-3 w-3" />
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedInput(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -241,6 +253,15 @@ export function UrlEncoder() {
               >
                 <Download className="h-3 w-3" />
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedOutput(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -256,6 +277,96 @@ export function UrlEncoder() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Expanded Input Dialog */}
+      <Dialog open={expandedInput} onOpenChange={setExpandedInput}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Input - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCopyToClipboard(input, "Input")}
+                  disabled={!input}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedInput(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={input}
+              onChange={setInput}
+              placeholder="https://example.com/search?q=hello world&type=web"
+              minHeight={600}
+              language="text"
+              wrapLines={true}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expanded Output Dialog */}
+      <Dialog open={expandedOutput} onOpenChange={setExpandedOutput}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Output - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCopyToClipboard(output, "Output")}
+                  disabled={!output}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDownloadAsFile(output, "url-result.txt")}
+                  disabled={!output}
+                  className="h-8 px-2"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedOutput(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={output}
+              onChange={() => {}}
+              placeholder="Encoded/Decoded URL will appear here..."
+              minHeight={600}
+              language="text"
+              wrapLines={true}
+              readOnly
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

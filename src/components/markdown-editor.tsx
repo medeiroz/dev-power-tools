@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Download, Trash2, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Copy, Download, Trash2, Eye, Maximize2, Minimize2 } from "lucide-react";
 import { useHistory } from "@/hooks/use-history";
 import { useToast } from "@/hooks/use-toast";
 import { copyToClipboard } from "@/lib/clipboard-utils";
@@ -13,6 +14,8 @@ import remarkGfm from "remark-gfm";
 
 export function MarkdownEditor() {
   const [input, setInput] = useState("");
+  const [expandedInput, setExpandedInput] = useState(false);
+  const [expandedOutput, setExpandedOutput] = useState(false);
   const { addHistoryEntry } = useHistory();
   const { toast } = useToast();
   const toastHelper = createToastHelper(toast);
@@ -167,6 +170,15 @@ ${rendered.innerHTML}
               >
                 <Download className="h-3 w-3" />
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedInput(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -233,6 +245,15 @@ console.log("Hello World!");
               >
                 <Download className="h-3 w-3" />
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setExpandedOutput(true)}
+                className="h-8 px-2"
+                title="Maximize"
+              >
+                <Maximize2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -287,6 +308,159 @@ console.log("Hello World!");
           </CardContent>
         </Card>
       </div>
+
+      {/* Expanded Input Dialog */}
+      <Dialog open={expandedInput} onOpenChange={setExpandedInput}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Markdown Input - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCopyMarkdown}
+                  disabled={!input}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDownloadMarkdown}
+                  disabled={!input}
+                  className="h-8 px-2"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedInput(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeEditor
+              value={input}
+              onChange={setInput}
+              placeholder={`# Hello, Markdown!
+
+## Features
+- **Bold** and *italic* text
+- [Links](https://example.com)
+- \`inline code\`
+
+### Code Blocks
+\`\`\`javascript
+console.log("Hello World!");
+\`\`\`
+
+### Tables
+| Header 1 | Header 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |`}
+              minHeight={600}
+              language="text"
+              wrapLines={true}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Expanded Output Dialog */}
+      <Dialog open={expandedOutput} onOpenChange={setExpandedOutput}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] h-[90vh] flex flex-col [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Preview - Maximized</span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCopyHTML}
+                  disabled={!input}
+                  className="h-8 px-2"
+                >
+                  <Copy className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDownloadHTML}
+                  disabled={!input}
+                  className="h-8 px-2"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setExpandedOutput(false)}
+                  className="h-8 px-2"
+                >
+                  <Minimize2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto">
+            <div className="markdown-preview min-h-full p-4 rounded-md border bg-card">
+              {input ? (
+                <div className="prose prose-invert max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                    h1: ({ ...props }) => <h1 className="text-3xl font-bold mt-6 mb-4 pb-2 border-b border-border" {...props} />,
+                    h2: ({ ...props }) => <h2 className="text-2xl font-bold mt-5 mb-3 pb-2 border-b border-border" {...props} />,
+                    h3: ({ ...props }) => <h3 className="text-xl font-bold mt-4 mb-2" {...props} />,
+                    h4: ({ ...props }) => <h4 className="text-lg font-bold mt-3 mb-2" {...props} />,
+                    h5: ({ ...props }) => <h5 className="text-base font-bold mt-2 mb-1" {...props} />,
+                    h6: ({ ...props }) => <h6 className="text-sm font-bold mt-2 mb-1" {...props} />,
+                    p: ({ ...props }) => <p className="mb-4 leading-7" {...props} />,
+                    a: ({ ...props }) => <a className="text-primary hover:underline" {...props} />,
+                    ul: ({ ...props }) => <ul className="list-disc list-inside mb-4 space-y-1" {...props} />,
+                    ol: ({ ...props }) => <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />,
+                    li: ({ ...props }) => <li className="ml-4" {...props} />,
+                    code: ({ className, children, ...props }) => {
+                      const isInline = !className;
+                      return isInline ? (
+                        <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                          {children}
+                        </code>
+                      ) : (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    pre: ({ ...props }) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4 font-mono text-sm" {...props} />,
+                    blockquote: ({ ...props }) => <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4" {...props} />,
+                    table: ({ ...props }) => <table className="w-full border-collapse mb-4" {...props} />,
+                    thead: ({ ...props }) => <thead className="bg-muted" {...props} />,
+                    th: ({ ...props }) => <th className="border border-border px-4 py-2 text-left font-semibold" {...props} />,
+                    td: ({ ...props }) => <td className="border border-border px-4 py-2" {...props} />,
+                    img: ({ ...props }) => <img className="max-w-full h-auto rounded-lg my-4" {...props} />,
+                    hr: ({ ...props }) => <hr className="my-6 border-border" {...props} />,
+                  }}
+                  >
+                    {input}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  Your rendered Markdown will appear here...
+                </p>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
