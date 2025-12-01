@@ -11,17 +11,20 @@ import { CodeEditor } from "@/components/code-editor";
 
 export function JsonGenerator() {
   const [output, setOutput] = useState("");
-  const [depth, setDepth] = useState([3]);
-  const [arrayLength, setArrayLength] = useState([5]);
-  const [objectKeys, setObjectKeys] = useState([5]);
+  const [depth, setDepth] = useState([2, 4]);
+  const [arrayLength, setArrayLength] = useState([3, 7]);
+  const [objectKeys, setObjectKeys] = useState([3, 7]);
   const [expandedOutput, setExpandedOutput] = useState(false);
   const { toast } = useToast();
 
   const handleGenerate = () => {
     const generated = generateRandomJson({
-      depth: depth[0],
-      arrayLength: arrayLength[0],
-      objectKeys: objectKeys[0],
+      depthMin: depth[0],
+      depthMax: depth[1],
+      arrayLengthMin: arrayLength[0],
+      arrayLengthMax: arrayLength[1],
+      objectKeysMin: objectKeys[0],
+      objectKeysMax: objectKeys[1],
     });
     setOutput(generated);
   };
@@ -78,38 +81,41 @@ export function JsonGenerator() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-sm">Nesting Depth: {depth[0]}</Label>
+              <Label className="text-sm">Nesting Depth: {depth[0]} - {depth[1]}</Label>
               <Slider
                 value={depth}
                 onValueChange={setDepth}
-                max={5}
+                max={6}
                 min={1}
                 step={1}
                 className="w-full"
+                minStepsBetweenThumbs={0}
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm">Max Array Length: {arrayLength[0]}</Label>
+              <Label className="text-sm">Array Length: {arrayLength[0]} - {arrayLength[1]}</Label>
               <Slider
                 value={arrayLength}
                 onValueChange={setArrayLength}
-                max={10}
-                min={1}
+                max={15}
+                min={0}
                 step={1}
                 className="w-full"
+                minStepsBetweenThumbs={0}
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm">Max Object Keys: {objectKeys[0]}</Label>
+              <Label className="text-sm">Object Keys: {objectKeys[0]} - {objectKeys[1]}</Label>
               <Slider
                 value={objectKeys}
                 onValueChange={setObjectKeys}
-                max={10}
+                max={15}
                 min={1}
                 step={1}
                 className="w-full"
+                minStepsBetweenThumbs={0}
               />
             </div>
 
@@ -118,7 +124,7 @@ export function JsonGenerator() {
               className="w-full bg-gradient-primary hover:opacity-90 transition-smooth"
             >
               <Shuffle className="h-4 w-4 mr-2" />
-              Generate Random JSON
+              Generate
             </Button>
           </CardContent>
         </Card>

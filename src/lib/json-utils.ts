@@ -389,11 +389,27 @@ function findDifferences(obj1: any, obj2: any, path = ''): any[] {
  * Generate random JSON for testing
  */
 export function generateRandomJson(options: {
-  depth?: number;
-  arrayLength?: number;
-  objectKeys?: number;
+  depthMin?: number;
+  depthMax?: number;
+  arrayLengthMin?: number;
+  arrayLengthMax?: number;
+  objectKeysMin?: number;
+  objectKeysMax?: number;
 } = {}): string {
-  const { depth = 3, arrayLength = 5, objectKeys = 5 } = options;
+  const { 
+    depthMin = 2, 
+    depthMax = 4, 
+    arrayLengthMin = 3, 
+    arrayLengthMax = 7, 
+    objectKeysMin = 3, 
+    objectKeysMax = 7 
+  } = options;
+  
+  const randomInRange = (min: number, max: number) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+  
+  const targetDepth = randomInRange(depthMin, depthMax);
   
   const randomValue = (currentDepth: number): any => {
     if (currentDepth <= 0) {
@@ -413,14 +429,16 @@ export function generateRandomJson(options: {
     switch (type) {
       case 'object':
         const obj: any = {};
-        for (let i = 0; i < Math.floor(Math.random() * objectKeys) + 1; i++) {
+        const numKeys = randomInRange(objectKeysMin, objectKeysMax);
+        for (let i = 0; i < numKeys; i++) {
           obj[`key_${i}`] = randomValue(currentDepth - 1);
         }
         return obj;
         
       case 'array':
         const arr = [];
-        for (let i = 0; i < Math.floor(Math.random() * arrayLength) + 1; i++) {
+        const arrLength = randomInRange(arrayLengthMin, arrayLengthMax);
+        for (let i = 0; i < arrLength; i++) {
           arr.push(randomValue(currentDepth - 1));
         }
         return arr;
@@ -430,5 +448,5 @@ export function generateRandomJson(options: {
     }
   };
   
-  return JSON.stringify(randomValue(depth), null, 2);
+  return JSON.stringify(randomValue(targetDepth), null, 2);
 }
