@@ -10,7 +10,8 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  minHeight?: number;
+  minHeight?: number | string;
+  maxHeight?: number | string;
   language?: string;
   wrapLines?: boolean;
   readOnly?: boolean;
@@ -21,6 +22,7 @@ export function CodeEditor({
   onChange, 
   placeholder, 
   minHeight = 300,
+  maxHeight,
   language = "json",
   wrapLines = true,
   readOnly = false
@@ -47,6 +49,7 @@ export function CodeEditor({
         `}
         style={{
           minHeight,
+          maxHeight,
           fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
           lineHeight: 1.4,
           tabSize: 2,
