@@ -70,8 +70,7 @@ export function RegexTester() {
     unicode: false,
     sticky: false,
   });
-  const [expandedInput, setExpandedInput] = useState(false);
-  const [expandedOutput, setExpandedOutput] = useState(false);
+  const [expandedEditor, setExpandedEditor] = useState(false);
   
   const { toast } = useToast();
   const toastHelper = createToastHelper(toast);
@@ -332,82 +331,61 @@ export function RegexTester() {
         </CardContent>
       </Card>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Test String Input */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Test String</CardTitle>
-                <CardDescription>Enter text to test against the pattern</CardDescription>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setExpandedInput(true)}
-              >
-                <Maximize2 className="h-4 w-4" />
-              </Button>
+      {/* Unified Test String Editor with Highlights */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Test String</CardTitle>
+              <CardDescription>
+                {matches.length > 0 
+                  ? `${matches.length} match${matches.length > 1 ? "es" : ""} found`
+                  : pattern ? "No matches" : "Enter text to test against the pattern"
+                }
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent>
-            <CodeEditor
-              value={testString}
-              onChange={setTestString}
-              language="text"
-              placeholder="Enter test string..."
-              minHeight="200px"
-              maxHeight="300px"
-            />
-          </CardContent>
-        </Card>
-
-        {/* Highlighted Output */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">Highlighted Matches</CardTitle>
-                <CardDescription>
-                  {matches.length > 0 
-                    ? `${matches.length} match${matches.length > 1 ? "es" : ""} found`
-                    : "No matches"
-                  }
-                </CardDescription>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setExpandedOutput(true)}
-              >
-                <Maximize2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setExpandedEditor(true)}
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            {/* Highlight layer (behind) */}
             <div 
-              className="min-h-[200px] max-h-[300px] overflow-auto rounded-md border border-border bg-muted/30 p-4 font-mono text-sm whitespace-pre-wrap"
+              className="absolute inset-0 rounded-md border border-transparent bg-background p-4 font-mono text-sm whitespace-pre-wrap overflow-auto pointer-events-none"
+              style={{ minHeight: "200px", maxHeight: "400px" }}
+              aria-hidden="true"
             >
               {testString ? (
                 highlightedText.split(/【|】/).map((part, index) => {
-                  // Odd indexes are matched parts (between 【 and 】)
                   if (index % 2 === 1) {
                     return (
-                      <mark key={index} className="bg-yellow-300 dark:bg-yellow-600 text-foreground px-0.5 rounded">
+                      <mark key={index} className="bg-yellow-300/50 dark:bg-yellow-500/40 rounded px-px">
                         {part}
                       </mark>
                     );
                   }
-                  return <span key={index}>{part}</span>;
+                  return <span key={index} className="text-transparent">{part}</span>;
                 })
-              ) : (
-                <span className="text-muted-foreground">Matches will be highlighted here...</span>
-              )}
+              ) : null}
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            {/* Editable layer (front) */}
+            <textarea
+              value={testString}
+              onChange={(e) => setTestString(e.target.value)}
+              placeholder="Enter test string..."
+              className="relative w-full rounded-md border border-border bg-transparent p-4 font-mono text-sm whitespace-pre-wrap resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              style={{ minHeight: "200px", maxHeight: "400px", caretColor: "hsl(var(--foreground))" }}
+              spellCheck={false}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Match Details */}
       {matches.length > 0 && (
@@ -477,70 +455,57 @@ export function RegexTester() {
         </Card>
       )}
 
-      {/* Expanded Input Dialog */}
-      <Dialog open={expandedInput} onOpenChange={setExpandedInput}>
+      {/* Expanded Editor Dialog */}
+      <Dialog open={expandedEditor} onOpenChange={setExpandedEditor}>
         <DialogContent className="max-w-4xl h-[80vh]">
           <DialogHeader>
-            <DialogTitle>Test String</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>Test String</DialogTitle>
+              <div className="flex items-center gap-2">
+                {matches.length > 0 && (
+                  <Badge variant="secondary">
+                    {matches.length} match{matches.length > 1 ? "es" : ""}
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setExpandedEditor(false)}
+                >
+                  <Minimize2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <CodeEditor
-              value={testString}
-              onChange={setTestString}
-              language="text"
-              placeholder="Enter test string..."
-              minHeight="100%"
-              maxHeight="calc(80vh - 120px)"
-            />
-          </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setExpandedInput(false)}>
-              <Minimize2 className="h-4 w-4 mr-2" />
-              Minimize
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Expanded Output Dialog */}
-      <Dialog open={expandedOutput} onOpenChange={setExpandedOutput}>
-        <DialogContent className="max-w-4xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>
-              Highlighted Matches ({matches.length} match{matches.length !== 1 ? "es" : ""})
-            </DialogTitle>
-          </DialogHeader>
-          <div 
-            className="flex-1 min-h-0 overflow-auto rounded-md border border-border bg-muted/30 p-4 font-mono text-sm whitespace-pre-wrap"
-            style={{ maxHeight: "calc(80vh - 160px)" }}
-          >
-            {testString ? (
-              highlightedText.split(/【|】/).map((part, index) => {
-                if (index % 2 === 1) {
-                  return (
-                    <mark key={index} className="bg-yellow-300 dark:bg-yellow-600 text-foreground px-0.5 rounded">
-                      {part}
-                    </mark>
-                  );
-                }
-                return <span key={index}>{part}</span>;
-              })
-            ) : (
-              <span className="text-muted-foreground">Matches will be highlighted here...</span>
-            )}
-          </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => handleCopy(testString, "Test string")}
+          <div className="flex-1 min-h-0 overflow-hidden relative">
+            {/* Highlight layer */}
+            <div 
+              className="absolute inset-0 rounded-md border border-transparent bg-background p-4 font-mono text-sm whitespace-pre-wrap overflow-auto pointer-events-none"
+              style={{ height: "calc(80vh - 120px)" }}
+              aria-hidden="true"
             >
-              <Copy className="h-4 w-4 mr-2" />
-              Copy
-            </Button>
-            <Button variant="outline" onClick={() => setExpandedOutput(false)}>
-              <Minimize2 className="h-4 w-4 mr-2" />
-              Minimize
-            </Button>
+              {testString ? (
+                highlightedText.split(/【|】/).map((part, index) => {
+                  if (index % 2 === 1) {
+                    return (
+                      <mark key={index} className="bg-yellow-300/50 dark:bg-yellow-500/40 rounded px-px">
+                        {part}
+                      </mark>
+                    );
+                  }
+                  return <span key={index} className="text-transparent">{part}</span>;
+                })
+              ) : null}
+            </div>
+            {/* Editable layer */}
+            <textarea
+              value={testString}
+              onChange={(e) => setTestString(e.target.value)}
+              placeholder="Enter test string..."
+              className="relative w-full h-full rounded-md border border-border bg-transparent p-4 font-mono text-sm whitespace-pre-wrap resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              style={{ height: "calc(80vh - 120px)", caretColor: "hsl(var(--foreground))" }}
+              spellCheck={false}
+            />
           </div>
         </DialogContent>
       </Dialog>
