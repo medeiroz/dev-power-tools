@@ -28,6 +28,7 @@ import {
   Archive,
   FileType,
   History,
+  Type,
   TestTube,
   Code,
   Briefcase
@@ -81,6 +82,7 @@ const utilities = [
   { title: "Timestamp Converter", url: "/utils/timestamp", icon: Clock },
   { title: "Regex Tester", url: "/utils/regex", icon: Search },
   { title: "Diff Tool", url: "/utils/diff", icon: GitCompare },
+  { title: "Lorem Ipsum", url: "/utils/lorem", icon: Type },
   { title: "Markdown Editor", url: "/utils/markdown", icon: FileType },
 ];
 
@@ -100,8 +102,8 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
 
   const getNavClassName = (active: boolean) =>
-    active 
-      ? "bg-primary/20 text-primary border-r-2 border-primary font-medium" 
+    active
+      ? "bg-primary/20 text-primary border-r-2 border-primary font-medium"
       : "hover:bg-sidebar-accent/50 transition-smooth";
 
   return (

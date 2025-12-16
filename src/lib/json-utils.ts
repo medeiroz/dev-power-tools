@@ -2,6 +2,11 @@
  * Core JSON utility functions for the developer tools
  */
 
+import { faker } from '@faker-js/faker';
+
+// Configure faker to use pt_BR locale and set seed for variation
+faker.setDefaultRefDate(new Date());
+
 export interface JsonParseResult {
   success: boolean;
   data?: any;
@@ -395,6 +400,11 @@ export function generateRandomJson(options: {
   arrayLengthMax?: number;
   objectKeysMin?: number;
   objectKeysMax?: number;
+  includeNulls?: boolean;
+  includeDates?: boolean;
+  includeNumbers?: boolean;
+  includeStrings?: boolean;
+  includeBooleans?: boolean;
 } = {}): string {
   const { 
     depthMin = 2, 
@@ -402,49 +412,215 @@ export function generateRandomJson(options: {
     arrayLengthMin = 3, 
     arrayLengthMax = 7, 
     objectKeysMin = 3, 
-    objectKeysMax = 7 
+    objectKeysMax = 7,
+    includeNulls = true,
+    includeDates = true,
+    includeNumbers = true,
+    includeStrings = true,
+    includeBooleans = true
   } = options;
   
   const randomInRange = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
+
+  // Realistic key names with data generators
+  const keyGenerators: Record<string, () => any> = {
+    // Personal Info
+    'id': () => faker.string.uuid(),
+    'name': () => faker.person.fullName(),
+    'firstName': () => faker.person.firstName(),
+    'lastName': () => faker.person.lastName(),
+    'email': () => faker.internet.email(),
+    'username': () => faker.internet.username(),
+    'password': () => faker.internet.password(),
+    'avatar': () => faker.image.avatar(),
+    'bio': () => faker.person.bio(),
+    'jobTitle': () => faker.person.jobTitle(),
+    'company': () => faker.company.name(),
+    
+    // Contact
+    'phone': () => faker.phone.number('(##) #####-####'),
+    'mobile': () => faker.phone.number('(##) 9####-####'),
+    'cpf': () => faker.phone.number('###.###.###-##'),
+    'cnpj': () => faker.phone.number('##.###.###/####-##'),
+    
+    // Address (BR)
+    'address': () => faker.location.streetAddress(),
+    'street': () => faker.location.street(),
+    'city': () => faker.location.city(),
+    'state': () => faker.location.state({ abbreviated: true }),
+    'zipCode': () => faker.location.zipCode('#####-###'),
+    'cep': () => faker.location.zipCode('#####-###'),
+    'country': () => 'Brasil',
+    'neighborhood': () => faker.location.county(),
+    
+    // Dates
+    'date': () => faker.date.past().toISOString(),
+    'createdAt': () => faker.date.past().toISOString(),
+    'updatedAt': () => faker.date.recent().toISOString(),
+    'birthDate': () => faker.date.birthdate({ min: 18, max: 80, mode: 'age' }).toISOString().split('T')[0],
+    'timestamp': () => faker.date.recent().getTime(),
+    
+    // Numbers
+    'age': () => faker.number.int({ min: 18, max: 80 }),
+    'price': () => parseFloat(faker.commerce.price({ min: 10, max: 1000 })),
+    'amount': () => faker.number.int({ min: 1, max: 1000 }),
+    'quantity': () => faker.number.int({ min: 1, max: 100 }),
+    'total': () => faker.number.float({ min: 10, max: 10000, precision: 0.01 }),
+    'rating': () => faker.number.float({ min: 1, max: 5, precision: 0.1 }),
+    'score': () => faker.number.int({ min: 0, max: 100 }),
+    
+    // Booleans
+    'isActive': () => faker.datatype.boolean(),
+    'isVerified': () => faker.datatype.boolean(),
+    'isPremium': () => faker.datatype.boolean(),
+    'isPublic': () => faker.datatype.boolean(),
+    'isEnabled': () => faker.datatype.boolean(),
+    
+    // Commerce
+    'product': () => faker.commerce.productName(),
+    'productName': () => faker.commerce.productName(),
+    'category': () => faker.commerce.department(),
+    'department': () => faker.commerce.department(),
+    'sku': () => faker.commerce.isbn(),
+    
+    // Web
+    'url': () => faker.internet.url(),
+    'website': () => faker.internet.url(),
+    'domain': () => faker.internet.domainName(),
+    'ip': () => faker.internet.ip(),
+    'userAgent': () => faker.internet.userAgent(),
+    
+    // Text
+    'title': () => faker.lorem.sentence(),
+    'description': () => faker.lorem.paragraph(),
+    'content': () => faker.lorem.paragraphs(2),
+    'message': () => faker.lorem.sentence(),
+    'comment': () => faker.lorem.sentences(2),
+    'note': () => faker.lorem.sentence(),
+    
+    // Status
+    'status': () => faker.helpers.arrayElement(['active', 'inactive', 'pending', 'approved', 'rejected']),
+    'type': () => faker.helpers.arrayElement(['standard', 'premium', 'basic', 'pro']),
+    'priority': () => faker.helpers.arrayElement(['low', 'medium', 'high', 'urgent']),
+    'role': () => faker.helpers.arrayElement(['admin', 'user', 'moderator', 'guest']),
+    
+    // Finance (BR)
+    'currency': () => 'BRL',
+    'balance': () => faker.number.float({ min: 100, max: 100000, precision: 0.01 }),
+    'salary': () => faker.number.float({ min: 1500, max: 50000, precision: 0.01 }),
+    
+    // IDs
+    'code': () => faker.string.alphanumeric(8).toUpperCase(),
+    'token': () => faker.string.alphanumeric(32),
+    'uuid': () => faker.string.uuid(),
+    'hash': () => faker.git.commitSha(),
+  };
+
+  const keyNames = Object.keys(keyGenerators);
+  const usedKeys = new Set<string>();
+  
+  const getRandomKey = (): string => {
+    let key = keyNames[Math.floor(Math.random() * keyNames.length)];
+    let counter = 1;
+    const originalKey = key;
+    while (usedKeys.has(key)) {
+      key = `${originalKey}${counter}`;
+      counter++;
+    }
+    usedKeys.add(key);
+    return key;
+  };
+  
+  const getValueForKey = (key: string): any => {
+    // Remove numbers from the end to get base key
+    const baseKey = key.replace(/\d+$/, '');
+    if (keyGenerators[baseKey]) {
+      return keyGenerators[baseKey]();
+    }
+    // Fallback to generic string
+    return faker.lorem.word();
+  };
   
   const targetDepth = randomInRange(depthMin, depthMax);
   
-  const randomValue = (currentDepth: number): any => {
+  const randomValue = (currentDepth: number, parentKey?: string, forceType?: string): any => {
     if (currentDepth <= 0) {
-      const primitives = [
-        Math.floor(Math.random() * 1000),
-        Math.random() > 0.5,
-        null,
-        `string_${Math.random().toString(36).substr(2, 9)}`,
-        new Date().toISOString()
-      ];
+      // If we have a parent key, use its generator
+      if (parentKey) {
+        return getValueForKey(parentKey);
+      }
+      
+      const primitives = [];
+      
+      if (includeNumbers) primitives.push(faker.number.int({ min: 1, max: 1000 }));
+      if (includeBooleans) primitives.push(faker.datatype.boolean());
+      if (includeNulls) primitives.push(null);
+      if (includeStrings) primitives.push(faker.lorem.word());
+      if (includeDates) primitives.push(faker.date.recent().toISOString());
+      
+      // Fallback if no types enabled
+      if (primitives.length === 0) {
+        return faker.lorem.word();
+      }
+      
       return primitives[Math.floor(Math.random() * primitives.length)];
     }
     
-    const types = ['object', 'array', 'primitive'];
-    const type = types[Math.floor(Math.random() * types.length)];
+    // Prioritize objects and arrays at higher depths (80% chance)
+    // At root level or high depth, almost always create objects/arrays
+    let types: string[];
+    if (forceType) {
+      types = [forceType];
+    } else if (currentDepth >= targetDepth - 1) {
+      // Root level: 90% object, 10% array
+      types = Math.random() < 0.9 ? ['object'] : ['array'];
+    } else if (currentDepth > targetDepth / 2) {
+      // Higher levels: prioritize structure (60% object, 30% array, 10% primitive)
+      const rand = Math.random();
+      if (rand < 0.6) types = ['object'];
+      else if (rand < 0.9) types = ['array'];
+      else types = ['primitive'];
+    } else {
+      // Lower levels: more balanced
+      const rand = Math.random();
+      if (rand < 0.4) types = ['object'];
+      else if (rand < 0.7) types = ['array'];
+      else types = ['primitive'];
+    }
+    
+    const type = types[0];
     
     switch (type) {
       case 'object':
         const obj: any = {};
         const numKeys = randomInRange(objectKeysMin, objectKeysMax);
+        usedKeys.clear(); // Reset for each object
         for (let i = 0; i < numKeys; i++) {
-          obj[`key_${i}`] = randomValue(currentDepth - 1);
+          const key = getRandomKey();
+          obj[key] = randomValue(currentDepth - 1, key);
         }
         return obj;
         
       case 'array':
         const arr = [];
         const arrLength = randomInRange(arrayLengthMin, arrayLengthMax);
+        
+        // 70% chance to create array of objects instead of mixed types
+        const shouldBeObjectArray = Math.random() < 0.7 && currentDepth > 1;
+        
         for (let i = 0; i < arrLength; i++) {
-          arr.push(randomValue(currentDepth - 1));
+          if (shouldBeObjectArray) {
+            arr.push(randomValue(currentDepth - 1, parentKey, 'object'));
+          } else {
+            arr.push(randomValue(currentDepth - 1, parentKey));
+          }
         }
         return arr;
         
       default:
-        return randomValue(0);
+        return randomValue(0, parentKey);
     }
   };
   

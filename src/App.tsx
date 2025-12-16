@@ -29,6 +29,8 @@ import { JWTDecoder } from "@/components/utilities/jwt-decoder";
 import { Base64Converter } from "@/components/utilities/base64-converter";
 import { RegexTester } from "@/components/utilities/regex-tester";
 import { MarkdownEditor } from "@/components/markdown-editor";
+import { LoremIpsum } from "@/components/lorem-ipsum";
+import { DiffTool } from "@/components/diff-tool";
 import NotFound from "@/pages/NotFound";
 import { History } from "@/components/history";
 
@@ -52,18 +54,18 @@ const App = () => (
                   DevTools v1.1
                 </div>
               </header>
-              
+
               {/* Main Content */}
               <main className="flex-1 overflow-auto">
                 <Routes>
                   <Route path="/" element={<JsonBeautify />} />
                   <Route path="/json/beautify" element={<JsonBeautify />} />
                   <Route path="/json/minify" element={<JsonMinify />} />
-            <Route path="/json/escape" element={<JsonEscape />} />
+                  <Route path="/json/escape" element={<JsonEscape />} />
                   <Route path="/json/generator" element={<JsonGenerator />} />
                   <Route path="/json/compare" element={<JsonCompare />} />
                   <Route path="/json/flatten" element={<JsonFlatten />} />
-                  
+
                   {/* Generators */}
                   <Route path="/generators/cpf" element={<CPFGenerator />} />
                   <Route path="/generators/cnpj" element={<CNPJGenerator />} />
@@ -72,13 +74,13 @@ const App = () => (
                   <Route path="/generators/uuid" element={<UUIDGenerator />} />
                   <Route path="/generators/rg" element={<RGGenerator />} />
                   <Route path="/generators/cep" element={<CEPGenerator />} />
-                  
+
                   {/* Validators */}
                   <Route path="/validators/cpf" element={<CPFValidator />} />
                   <Route path="/validators/cnpj" element={<CNPJValidator />} />
                   <Route path="/validators/email" element={<EmailValidator />} />
                   <Route path="/validators/rg" element={<RGValidator />} />
-                  
+
                   {/* Utilities */}
                   <Route path="/utils/jwt" element={<JWTDecoder />} />
                   <Route path="/utils/base64" element={<Base64Converter />} />
@@ -86,14 +88,16 @@ const App = () => (
                   <Route path="/utils/hash" element={<HashGenerator />} />
                   <Route path="/utils/timestamp" element={<TimestampConverter />} />
                   <Route path="/utils/regex" element={<RegexTester />} />
+                  <Route path="/utils/diff" element={<DiffTool />} />
+                  <Route path="/utils/lorem" element={<LoremIpsum />} />
                   <Route path="/utils/markdown" element={<MarkdownEditor />} />
                   <Route path="/utilities/url-encoder" element={<UrlEncoder />} />
                   <Route path="/utilities/hash-generator" element={<HashGenerator />} />
                   <Route path="/utilities/timestamp-converter" element={<TimestampConverter />} />
-                  
+
                   {/* Productivity */}
                   <Route path="/history" element={<History />} />
-                  
+
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
