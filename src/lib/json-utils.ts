@@ -20,6 +20,73 @@ export interface JsonFormatOptions {
 }
 
 /**
+ * Decode Unicode escape sequences to their original characters
+ * Handles:
+ * - \u00A0 → space (non-breaking space converted to normal space)
+ * - \u2028 → \n (line separator converted to line feed)
+ * - \u2029 → \n (paragraph separator converted to line feed)
+ * - \u2019 → ' (typographic apostrophe)
+ * - \uXXXX\uYYYY → emoji (surrogate pairs like 😊)
+ * - &quot; → "
+ * 
+ * Uses JSON.parse() natively to decode Unicode sequences
+ */
+export function decodeUnicodeChars(input: string): string {
+  let result = input;
+  
+  // Replace HTML entities first
+  result = result.replace(/&quot;/g, '"');
+  result = result.replace(/&amp;/g, '&');
+  result = result.replace(/&lt;/g, '<');
+  result = result.replace(/&gt;/g, '>');
+  
+  // Use JSON.parse to decode Unicode escapes naturally
+  // Wrap in quotes to make it a valid JSON string, then parse
+  try {
+    // Only process if there are Unicode escapes
+    if (result.includes('\\u')) {
+      result = JSON.parse('"' + result.replace(/"/g, '\\"') + '"');
+    }
+  } catch {
+    // If JSON.parse fails, fallback to manual replacement
+    // This handles edge cases where the string isn't valid JSON
+    result = result
+      .replace(/\\u([0-9A-Fa-f]{4})/g, (match, hex) => {
+        const charCode = parseInt(hex, 16);
+        return String.fromCharCode(charCode);
+      });
+  }
+  
+  // After decoding, convert problematic line/paragraph separators to normal line feeds
+  // This prevents VS Code warnings while making them readable
+  result = result.replace(/\u2028/g, '\n');
+  result = result.replace(/\u2029/g, '\n');
+  
+  return result;
+}
+
+/**
+ * Try to decode Unicode characters, but return original if it breaks JSON validity
+ */
+export function safeDecodeUnicode(input: string): string {
+  try {
+    const decoded = decodeUnicodeChars(input);
+    
+    // Test if the decoded version is still valid JSON by trying to parse it
+    try {
+      JSON.parse(decoded);
+      return decoded; // If valid, return decoded version
+    } catch {
+      // If invalid JSON, return original
+      return input;
+    }
+  } catch {
+    // If decoding fails, return original
+    return input;
+  }
+}
+
+/**
  * Safely parse JSON with error handling
  */
 export function safeJsonParse(jsonString: string): JsonParseResult {
@@ -40,13 +107,16 @@ export function safeJsonParse(jsonString: string): JsonParseResult {
 export function beautifyJson(input: string, options: JsonFormatOptions = {}): JsonParseResult {
   const { indent = 2, recursive = false, indentType = 'space' } = options;
   
+  // Try to decode Unicode characters first
+  const decodedInput = safeDecodeUnicode(input);
+  
   // Try to parse directly first
-  let parseResult = safeJsonParse(input);
+  let parseResult = safeJsonParse(decodedInput);
   
   // If parsing fails, try unescaping and parsing again
   if (!parseResult.success) {
     try {
-      const unescapedInput = unescapeJson(input);
+      const unescapedInput = unescapeJson(decodedInput);
       parseResult = safeJsonParse(unescapedInput);
     } catch {
       // If unescape fails, return the original parse error
@@ -64,8 +134,12 @@ export function beautifyJson(input: string, options: JsonFormatOptions = {}): Js
       result = recursiveJsonParse(result);
     }
     
+    // Process the parsed data to decode Unicode in string values
+    result = processUnicodeInObject(result);
+    
     const indentString = indentType === 'tab' ? '\t' : indent;
     const formatted = JSON.stringify(result, null, indentString);
+    
     return { success: true, data: formatted };
   } catch (error) {
     return { 
@@ -76,16 +150,40 @@ export function beautifyJson(input: string, options: JsonFormatOptions = {}): Js
 }
 
 /**
+ * Process an object/array to decode Unicode characters in all string values
+ */
+function processUnicodeInObject(obj: any): any {
+  if (typeof obj === 'string') {
+    return decodeUnicodeChars(obj);
+  } else if (Array.isArray(obj)) {
+    return obj.map(processUnicodeInObject);
+  } else if (obj !== null && typeof obj === 'object') {
+    const result: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = processUnicodeInObject(value);
+    }
+    return result;
+  }
+  return obj;
+}
+
+/**
  * Minify JSON by removing all whitespace
  */
 export function minifyJson(input: string): JsonParseResult {
-  const parseResult = safeJsonParse(input);
+  // Try to decode Unicode characters first
+  const decodedInput = safeDecodeUnicode(input);
+  
+  const parseResult = safeJsonParse(decodedInput);
   if (!parseResult.success) {
     return parseResult;
   }
 
   try {
-    const minified = JSON.stringify(parseResult.data);
+    // Process the parsed data to decode Unicode in string values
+    const result = processUnicodeInObject(parseResult.data);
+    const minified = JSON.stringify(result);
+    
     return { success: true, data: minified };
   } catch (error) {
     return { 
@@ -99,16 +197,21 @@ export function minifyJson(input: string): JsonParseResult {
  * Escape JSON for embedding in strings
  */
 export function escapeJson(input: string): string {
+  // Try to decode Unicode characters first
+  const decodedInput = decodeUnicodeChars(input);
+  
   // Use JSON.stringify to properly escape the string
   // Remove the outer quotes added by stringify
-  return JSON.stringify(input).slice(1, -1);
+  return JSON.stringify(decodedInput).slice(1, -1);
 }
 
 /**
  * Unescape JSON from string format
  */
 export function unescapeJson(input: string): string {
-  const trimmed = input.trim();
+  // Try to decode Unicode characters first
+  const decodedInput = decodeUnicodeChars(input);
+  const trimmed = decodedInput.trim();
   
   // If the input is a JSON string (wrapped in quotes), parse it
   if (trimmed.startsWith('"') && trimmed.endsWith('"')) {

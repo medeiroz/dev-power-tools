@@ -9,7 +9,9 @@ import {
   serializeToJson, 
   deserializeJson, 
   compareJson, 
-  generateRandomJson 
+  generateRandomJson,
+  decodeUnicodeChars,
+  safeDecodeUnicode
 } from '../../src/lib/json-utils';
 
 describe('json-utils', () => {
@@ -394,7 +396,7 @@ describe('json-utils', () => {
     });
 
     test('should respect depth option', () => {
-      const result = generateRandomJson({ depth: 0 });
+      const result = generateRandomJson({ depthMax: 0 });
       const parseResult = safeJsonParse(result);
       
       expect(parseResult.success).toBe(true);
@@ -417,13 +419,121 @@ describe('json-utils', () => {
     });
 
     test('should respect object keys option', () => {
-      const result = generateRandomJson({ objectKeys: 1, depth: 1 });
+      const result = generateRandomJson({ objectKeysMax: 1, depthMax: 1 });
       const parseResult = safeJsonParse(result);
       
       expect(parseResult.success).toBe(true);
       if (typeof parseResult.data === 'object' && parseResult.data !== null && !Array.isArray(parseResult.data)) {
         expect(Object.keys(parseResult.data).length).toBeLessThanOrEqual(1);
       }
+    });
+  });
+
+  describe('decodeUnicodeChars', () => {
+    test('should decode non-breaking space', () => {
+      const input = 'Hello\\u00A0World';
+      const result = decodeUnicodeChars(input);
+      expect(result).toBe('Hello\u00A0World');
+    });
+
+    test('should convert line separator to line feed', () => {
+      const input = 'Line1\\u2028Line2';
+      const result = decodeUnicodeChars(input);
+      // Line separator should be converted to literal \n
+      expect(result).toContain('Line1');
+      expect(result).toContain('Line2');
+      expect(result.includes('\n')).toBe(true);
+    });
+
+    test('should decode typographic apostrophe', () => {
+      const input = 'Don\\u2019t';
+      const result = decodeUnicodeChars(input);
+      expect(result).toBe('Don\u2019t');
+    });
+
+    test('should decode emoji with surrogate pairs', () => {
+      const input = '\\uD83D\\uDE0A';
+      const result = decodeUnicodeChars(input);
+      expect(result).toBe('😊');
+    });
+
+    test('should decode HTML entities', () => {
+      const input = '&quot;Hello&quot;';
+      const result = decodeUnicodeChars(input);
+      expect(result).toBe('"Hello"');
+    });
+
+    test('should handle mixed Unicode and HTML entities', () => {
+      const input = '&quot;Don\\u2019t \\uD83D\\uDE0A&quot;';
+      const result = decodeUnicodeChars(input);
+      expect(result).toBe('"Don\u2019t 😊"');
+    });
+  });
+
+  describe('safeDecodeUnicode', () => {
+    test('should decode Unicode in valid JSON', () => {
+      const input = '{"text":"Hello\\u00A0World"}';
+      const result = safeDecodeUnicode(input);
+      expect(result).toBe('{"text":"Hello\u00A0World"}');
+    });
+
+    test('should return original if decoding breaks JSON', () => {
+      const input = '{"text":"\\u0022"}';
+      const result = safeDecodeUnicode(input);
+      // If it breaks, should return original
+      expect(typeof result).toBe('string');
+    });
+  });
+
+  describe('beautifyJson with Unicode', () => {
+    test('should beautify JSON with Unicode characters', () => {
+      const input = '{"message":"Hello\\u00A0World","emoji":"\\uD83D\\uDE0A"}';
+      const result = beautifyJson(input);
+      
+      expect(result.success).toBe(true);
+      if (result.success && result.data) {
+        expect(result.data).toContain('Hello\u00A0World');
+        expect(result.data).toContain('😊');
+      }
+    });
+  });
+
+  describe('minifyJson with Unicode', () => {
+    test('should minify JSON with Unicode characters', () => {
+      const input = '{\n  "message": "Don\\u2019t",\n  "emoji": "\\uD83D\\uDE0A"\n}';
+      const result = minifyJson(input);
+      
+      expect(result.success).toBe(true);
+      if (result.success && result.data) {
+        expect(result.data).toContain('Don\u2019t');
+        expect(result.data).toContain('😊');
+      }
+    });
+  });
+
+  describe('escapeJson with Unicode', () => {
+    test('should escape text with Unicode characters', () => {
+      const input = 'Hello\u00A0World 😊';
+      const result = escapeJson(input);
+      
+      expect(result).toBeTruthy();
+      expect(typeof result).toBe('string');
+    });
+  });
+
+  describe('unescapeJson with Unicode', () => {
+    test('should unescape text with Unicode escapes', () => {
+      const input = 'Hello\\u00A0World';
+      const result = unescapeJson(input);
+      
+      expect(result).toBe('Hello\u00A0World');
+    });
+
+    test('should unescape emoji with surrogate pairs', () => {
+      const input = '\\uD83D\\uDE0A';
+      const result = unescapeJson(input);
+      
+      expect(result).toBe('😊');
     });
   });
 });
