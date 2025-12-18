@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, ArrowLeftRight, CheckCircle, AlertCircle, Maximize2, Minimize2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Copy, ArrowLeftRight, CheckCircle, AlertCircle, Maximize2, Minimize2, History, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CodeEditor } from "@/components/code-editor";
 import { compareJson } from "@/lib/json-utils";
@@ -17,8 +17,25 @@ export function JsonCompare() {
   const [isValid, setIsValid] = useState<boolean | undefined>(undefined);
   const [expandedInput1, setExpandedInput1] = useState(false);
   const [expandedInput2, setExpandedInput2] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLimit, setHistoryLimit] = useState(20);
   const { toast } = useToast();
-  const { addHistoryEntry } = useHistory();
+  const { addHistoryEntry, getHistoryByTool } = useHistory();
+  
+  const toolHistory = getHistoryByTool("JSON Compare");
+  const visibleHistory = toolHistory.slice(0, historyLimit);
+  const hasMoreHistory = toolHistory.length > historyLimit;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        setHistoryOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleCompare = () => {
     if (!input1.trim() || !input2.trim()) {
@@ -35,12 +52,37 @@ export function JsonCompare() {
       setIsValid(true);
       setError("");
       
+      // Format differences for better readability in history
+      const formattedDifferences = result.data?.length 
+        ? result.data.map((diff: any) => {
+            const pathStr = diff.path || 'root';
+            const typeLabel = diff.type === 'added' ? '➕ Added' 
+                           : diff.type === 'removed' ? '➖ Removed' 
+                           : diff.type === 'changed' ? '🔄 Changed' 
+                           : diff.type;
+            
+            let details = `${typeLabel} at "${pathStr}"`;
+            if (diff.type === 'changed') {
+              details += `\n  Old: ${JSON.stringify(diff.oldValue)}`;
+              details += `\n  New: ${JSON.stringify(diff.newValue)}`;
+            } else if (diff.type === 'added') {
+              details += `\n  Value: ${JSON.stringify(diff.newValue)}`;
+            } else if (diff.type === 'removed') {
+              details += `\n  Value: ${JSON.stringify(diff.oldValue)}`;
+            }
+            return details;
+          }).join('\n\n')
+        : 'No differences found';
+      
       addHistoryEntry({
         tool: "JSON Compare",
         operation: "compare",
-        input: `JSON 1: ${input1}\n\nJSON 2: ${input2}`,
-        output: result.data?.length ? `Found ${result.data.length} differences` : "No differences found",
-        options: { differencesCount: result.data?.length || 0 }
+        input: { json1: input1, json2: input2 },
+        output: formattedDifferences,
+        options: { 
+          differencesCount: result.data?.length || 0,
+          rawDifferences: result.data 
+        }
       });
     } else {
       setDifferences([]);
@@ -50,7 +92,7 @@ export function JsonCompare() {
       addHistoryEntry({
         tool: "JSON Compare",
         operation: "compare",
-        input: `JSON 1: ${input1}\n\nJSON 2: ${input2}`,
+        input: { json1: input1, json2: input2 },
         output: "",
         error: result.error || "Comparison failed"
       });
@@ -118,16 +160,178 @@ export function JsonCompare() {
               {isValid ? (
                 <>
                   <CheckCircle className="h-3 w-3" />
-                  Valid JSONs
+                  Match
                 </>
               ) : (
                 <>
                   <AlertCircle className="h-3 w-3" />
-                  Invalid JSON
+                  Different
                 </>
               )}
             </Badge>
           )}
+          <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+              >
+                <History className="h-4 w-4" />
+                History
+                {toolHistory.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 bg-white text-violet-700 hover:bg-gray-100 font-semibold">
+                    {toolHistory.length}
+                  </Badge>
+                )}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  JSON Compare History
+                  <Badge variant="secondary">{toolHistory.length} entries</Badge>
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground">Recent operations (showing {visibleHistory.length} of {toolHistory.length})</p>
+              </DialogHeader>
+              <div className="space-y-4">
+                {toolHistory.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center">
+                      <History className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-muted-foreground">No history yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">Start using this tool to see your history here</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  visibleHistory.map((entry) => (
+                    <Card key={entry.id} className="relative">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={entry.error ? "destructive" : "default"} className="gap-1">
+                              {entry.error ? (
+                                <>
+                                  <AlertCircle className="h-3 w-3" />
+                                  Error
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-3 w-3" />
+                                  Success
+                                </>
+                              )}
+                            </Badge>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {new Date(entry.timestamp).toLocaleString()}
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (entry.input && typeof entry.input === 'object' && 'json1' in entry.input && 'json2' in entry.input) {
+                                setInput1(entry.input.json1);
+                                setInput2(entry.input.json2);
+                                setHistoryOpen(false);
+                                toast({
+                                  title: "Applied!",
+                                  description: "Input restored from history",
+                                });
+                              }
+                            }}
+                            className="gap-2"
+                          >
+                            <ArrowLeftRight className="h-3 w-3" />
+                            Apply
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {entry.input && (
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="text-xs font-medium">Input:</div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  const inputText = typeof entry.input === 'object' && 'json1' in entry.input
+                                    ? `JSON 1:\n${entry.input.json1}\n\nJSON 2:\n${entry.input.json2}`
+                                    : JSON.stringify(entry.input, null, 2);
+                                  copyToClipboard(inputText, "Input");
+                                }}
+                                className="h-6 px-2"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            {typeof entry.input === 'object' && 'json1' in entry.input ? (
+                              <div className="space-y-2">
+                                <div>
+                                  <div className="text-xs text-muted-foreground mb-1">JSON 1:</div>
+                                  <div className="p-2 rounded text-xs font-mono max-h-20 overflow-auto bg-muted">
+                                    {entry.input.json1.length > 150 ? entry.input.json1.substring(0, 150) + "..." : entry.input.json1}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-xs text-muted-foreground mb-1">JSON 2:</div>
+                                  <div className="p-2 rounded text-xs font-mono max-h-20 overflow-auto bg-muted">
+                                    {entry.input.json2.length > 150 ? entry.input.json2.substring(0, 150) + "..." : entry.input.json2}
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-2 rounded text-xs font-mono max-h-20 overflow-auto bg-muted">
+                                {typeof entry.input === 'string' 
+                                  ? (entry.input.length > 200 ? entry.input.substring(0, 200) + "..." : entry.input)
+                                  : JSON.stringify(entry.input, null, 2).substring(0, 200) + "..."}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xs font-medium">
+                              {entry.error ? "Error:" : "Output:"}
+                            </div>
+                            {!entry.error && entry.output && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(entry.output, "Output")}
+                                className="h-6 px-2"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                          <div className={`p-2 rounded text-xs font-mono max-h-32 overflow-auto whitespace-pre-wrap ${
+                            entry.error ? 'bg-destructive/10 text-destructive' : 'bg-muted'
+                          }`}>
+                            {entry.error || (entry.output.length > 300 ? entry.output.substring(0, 300) + "..." : entry.output)}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+                {hasMoreHistory && (
+                  <div className="text-center pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setHistoryLimit(prev => prev + 20)}
+                    >
+                      Load More ({toolHistory.length - historyLimit} remaining)
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
         <p className="text-muted-foreground">
           Compare two JSON objects and highlight the differences between them.

@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,8 +36,25 @@ export function GeneratorLayout({
 }: GeneratorLayoutProps) {
   const { toast } = useToast();
   const { getHistoryByTool } = useHistory();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLimit, setHistoryLimit] = useState(20);
   
   const toolHistory = toolName ? getHistoryByTool(toolName) : [];
+  const visibleHistory = toolHistory.slice(0, historyLimit);
+  const hasMoreHistory = toolHistory.length > historyLimit;
+
+  // Atalho de teclado Ctrl/Cmd + H para abrir histórico
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h' && toolName) {
+        e.preventDefault();
+        setHistoryOpen(prev => !prev);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toolName]);
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -76,9 +93,111 @@ export function GeneratorLayout({
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          {title}
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            {title}
+          </h1>
+          {toolName && (
+            <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                >
+                  <History className="h-4 w-4" />
+                  History
+                  {toolHistory.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 bg-white text-violet-700 hover:bg-gray-100 font-semibold">
+                      {toolHistory.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5" />
+                    {toolName} History
+                    <Badge variant="secondary">{toolHistory.length} entries</Badge>
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground">Recent operations (showing {visibleHistory.length} of {toolHistory.length})</p>
+                </DialogHeader>
+                <div className="space-y-4">
+                  {toolHistory.length === 0 ? (
+                    <Card>
+                      <CardContent className="py-8 text-center">
+                        <History className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-muted-foreground">No history yet</p>
+                        <p className="text-sm text-muted-foreground mt-1">Start using this tool to see your history here</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    visibleHistory.map((entry) => (
+                      <Card key={entry.id} className="relative">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={entry.error ? "destructive" : "default"} className="gap-1">
+                                {entry.error ? (
+                                  <>
+                                    <AlertCircle className="h-3 w-3" />
+                                    Error
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="h-3 w-3" />
+                                    Success
+                                  </>
+                                )}
+                              </Badge>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {new Date(entry.timestamp).toLocaleString()}
+                              </div>
+                            </div>
+                            {!entry.error && entry.output && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyToClipboard(entry.output, "Output")}
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div>
+                            <div className="text-xs font-medium mb-1">
+                              {entry.error ? "Error:" : "Output:"}
+                            </div>
+                            <div className={`p-2 rounded text-xs font-mono max-h-20 overflow-auto ${
+                              entry.error ? 'bg-destructive/10 text-destructive' : 'bg-muted'
+                            }`}>
+                              {entry.error || (entry.output.length > 200 ? entry.output.substring(0, 200) + "..." : entry.output)}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                  {hasMoreHistory && (
+                    <div className="text-center pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setHistoryLimit(prev => prev + 20)}
+                      >
+                        Load More ({toolHistory.length - historyLimit} remaining)
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
         <p className="text-muted-foreground">{description}</p>
       </div>
 
@@ -102,71 +221,6 @@ export function GeneratorLayout({
         >
           {generateLabel}
         </Button>
-        {toolName && toolHistory.length > 0 && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <History className="h-4 w-4 mr-2" />
-                History ({toolHistory.length})
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
-              <DialogHeader>
-                <DialogTitle>{toolName} History</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                {toolHistory.slice(0, 10).map((entry) => (
-                  <Card key={entry.id} className="relative">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Badge variant={entry.error ? "destructive" : "default"} className="gap-1">
-                            {entry.error ? (
-                              <>
-                                <AlertCircle className="h-3 w-3" />
-                                Error
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle className="h-3 w-3" />
-                                Success
-                              </>
-                            )}
-                          </Badge>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {new Date(entry.timestamp).toLocaleString()}
-                          </div>
-                        </div>
-                        {!entry.error && entry.output && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(entry.output, "Output")}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <div className="text-xs font-medium mb-1">
-                          {entry.error ? "Error:" : "Output:"}
-                        </div>
-                        <div className={`p-2 rounded text-xs font-mono max-h-20 overflow-auto ${
-                          entry.error ? 'bg-destructive/10 text-destructive' : 'bg-muted'
-                        }`}>
-                          {entry.error || (entry.output.length > 200 ? entry.output.substring(0, 200) + "..." : entry.output)}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
 
       {/* Output Section */}

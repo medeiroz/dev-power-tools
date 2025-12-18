@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Copy, Download, Shuffle, Maximize2, Minimize2, Trash2, Info, Loader2, HelpCircle, RotateCcw } from "lucide-react";
+import { Copy, Download, Shuffle, Maximize2, Minimize2, Trash2, Info, Loader2, HelpCircle, RotateCcw, History, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateRandomJson } from "@/lib/json-utils";
 import { CodeEditor } from "@/components/code-editor";
@@ -106,9 +106,26 @@ export function JsonGenerator() {
   const [includeBooleans, setIncludeBooleans] = useState(savedSettings.includeBooleans);
   const [expandedOutput, setExpandedOutput] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLimit, setHistoryLimit] = useState(20);
   const { toast } = useToast();
   const toastHelper = createToastHelper(toast);
-  const { addHistoryEntry } = useHistory();
+  const { addHistoryEntry, getHistoryByTool } = useHistory();
+  
+  const toolHistory = getHistoryByTool("Random JSON Generator");
+  const visibleHistory = toolHistory.slice(0, historyLimit);
+  const hasMoreHistory = toolHistory.length > historyLimit;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        setHistoryOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
@@ -231,9 +248,122 @@ export function JsonGenerator() {
   return (
     <div className="flex-1 space-y-6 p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          Random JSON Generator
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            Random JSON Generator
+          </h1>
+          <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+              >
+                <History className="h-4 w-4" />
+                History
+                {toolHistory.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 bg-white text-violet-700 hover:bg-gray-100 font-semibold">
+                    {toolHistory.length}
+                  </Badge>
+                )}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  JSON Generator History
+                  <Badge variant="secondary">{toolHistory.length} entries</Badge>
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground">Recent operations (showing {visibleHistory.length} of {toolHistory.length})</p>
+              </DialogHeader>
+              <div className="space-y-4">
+                {toolHistory.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center">
+                      <History className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-muted-foreground">No history yet</p>
+                      <p className="text-sm text-muted-foreground mt-1">Start using this tool to see your history here</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  visibleHistory.map((entry) => (
+                    <Card key={entry.id} className="relative">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={entry.error ? "destructive" : "default"} className="gap-1">
+                              {entry.error ? (
+                                <>
+                                  <AlertCircle className="h-3 w-3" />
+                                  Error
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-3 w-3" />
+                                  Success
+                                </>
+                              )}
+                            </Badge>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {new Date(entry.timestamp).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {entry.input && (
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="text-xs font-medium">Settings:</div>
+                            </div>
+                            <div className="p-2 rounded text-xs font-mono max-h-16 overflow-auto bg-muted/50">
+                              {entry.input}
+                            </div>
+                          </div>
+                        )}
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xs font-medium">
+                              {entry.error ? "Error:" : "Output:"}
+                            </div>
+                            {!entry.error && entry.output && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopyToClipboard(entry.output, "Output")}
+                                className="h-6 px-2"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                          <div className={`p-2 rounded text-xs font-mono max-h-24 overflow-auto ${
+                            entry.error ? 'bg-destructive/10 text-destructive' : 'bg-muted'
+                          }`}>
+                            {entry.error || (entry.output.length > 300 ? entry.output.substring(0, 300) + "..." : entry.output)}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+                {hasMoreHistory && (
+                  <div className="text-center pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setHistoryLimit(prev => prev + 20)}
+                    >
+                      Load More ({toolHistory.length - historyLimit} remaining)
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         <p className="text-muted-foreground">
           Generate random JSON data for testing and development purposes.
         </p>
