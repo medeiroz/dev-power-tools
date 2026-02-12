@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Copy, Download, Shuffle, Trash2, HelpCircle, RotateCcw, Loader2 } from "lucide-react";
+import { Copy, Download, Shuffle, Trash2, HelpCircle, RotateCcw, Loader2, History, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CodeEditor } from "@/components/code-editor";
 import { useHistory } from "@/hooks/use-history";
@@ -105,10 +106,27 @@ export function LoremIpsum() {
   const [includeLists, setIncludeLists] = useState(savedSettings.includeLists);
   const [includeEmphasis, setIncludeEmphasis] = useState(savedSettings.includeEmphasis);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLimit, setHistoryLimit] = useState(20);
 
   const { toast } = useToast();
   const toastHelper = createToastHelper(toast);
-  const { addHistoryEntry } = useHistory();
+  const { addHistoryEntry, getHistoryByTool } = useHistory();
+  
+  const toolHistory = getHistoryByTool("Lorem Ipsum Generator");
+  const visibleHistory = toolHistory.slice(0, historyLimit);
+  const hasMoreHistory = toolHistory.length > historyLimit;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        setHistoryOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Save settings to localStorage whenever they change
   useEffect(() => {
@@ -342,9 +360,113 @@ export function LoremIpsum() {
   return (
     <div className="flex-1 space-y-6 p-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-          Lorem Ipsum Generator
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            Lorem Ipsum Generator
+          </h1>
+          <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <History className="h-4 w-4" />
+                History
+                {toolHistory.length > 0 && (
+                  <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
+                    {toolHistory.length}
+                  </Badge>
+                )}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">History</h2>
+                  <Badge variant="secondary">{toolHistory.length} items</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Recent operations (showing {visibleHistory.length} of {toolHistory.length})</p>
+                {toolHistory.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No history yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {visibleHistory.map((entry, index) => (
+                      <Card key={index} className="p-4 hover:bg-accent/50 transition-colors">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className="font-mono text-xs">
+                                  {entry.tool}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(entry.timestamp).toLocaleString()}
+                                </span>
+                              </div>
+                              <div className="space-y-2">
+                                {entry.input && (
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <div className="text-xs font-medium text-muted-foreground">Settings:</div>
+                                    </div>
+                                    <pre className="text-xs bg-muted/50 p-2 rounded overflow-x-auto max-h-16">
+                                      {typeof entry.input === 'string' ? entry.input : JSON.stringify(entry.input, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                                {entry.output && (
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <div className="text-xs font-medium text-muted-foreground">Output:</div>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          clipboardHelper.copyToClipboard(
+                                            typeof entry.output === 'string' ? entry.output : JSON.stringify(entry.output, null, 2)
+                                          );
+                                        }}
+                                        className="h-6 px-2 gap-1"
+                                      >
+                                        <Copy className="h-3 w-3" />
+                                        Copy
+                                      </Button>
+                                    </div>
+                                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-20">
+                                      {typeof entry.output === 'string' 
+                                        ? (entry.output.length > 300 ? entry.output.substring(0, 300) + "..." : entry.output)
+                                        : JSON.stringify(entry.output, null, 2).substring(0, 300) + "..."}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                    {hasMoreHistory && (
+                      <div className="text-center pt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setHistoryLimit(prev => prev + 20)}
+                        >
+                          Load More ({toolHistory.length - historyLimit} remaining)
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         <p className="text-muted-foreground">
           Generate placeholder text in multiple languages and formats for your projects.
         </p>

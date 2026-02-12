@@ -22,9 +22,11 @@ import { CNPJGenerator } from "@/components/generators/cnpj-generator";
 import { PhoneGenerator } from "@/components/generators/phone-generator";
 import { PasswordGenerator } from "@/components/generators/password-generator";
 import { UUIDGenerator } from "@/components/generators/uuid-generator";
+import { CreditCardGenerator } from "@/components/generators/credit-card-generator";
 import { CPFValidator } from "@/components/validators/cpf-validator";
 import { CNPJValidator } from "@/components/validators/cnpj-validator";
 import { EmailValidator } from "@/components/validators/email-validator";
+import { CEPValidator } from "@/components/validators/cep-validator";
 import { JWTDecoder } from "@/components/utilities/jwt-decoder";
 import { Base64Converter } from "@/components/utilities/base64-converter";
 import { RegexTester } from "@/components/utilities/regex-tester";
@@ -74,11 +76,13 @@ const App = () => (
                   <Route path="/generators/uuid" element={<UUIDGenerator />} />
                   <Route path="/generators/rg" element={<RGGenerator />} />
                   <Route path="/generators/cep" element={<CEPGenerator />} />
+                  <Route path="/generators/credit-card" element={<CreditCardGenerator />} />
 
                   {/* Validators */}
                   <Route path="/validators/cpf" element={<CPFValidator />} />
                   <Route path="/validators/cnpj" element={<CNPJValidator />} />
                   <Route path="/validators/email" element={<EmailValidator />} />
+                  <Route path="/validators/cep" element={<CEPValidator />} />
                   <Route path="/validators/rg" element={<RGValidator />} />
 
                   {/* Utilities */}

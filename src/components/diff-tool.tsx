@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download, Trash2, ArrowUpDown, ArrowLeftRight, Maximize2, Minimize2, GitCompare } from "lucide-react";
+import { Copy, Download, Trash2, ArrowUpDown, ArrowLeftRight, Maximize2, Minimize2, GitCompare, History, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CodeEditor } from "@/components/code-editor";
 import { useHistory } from "@/hooks/use-history";
@@ -25,9 +25,26 @@ export function DiffTool() {
   const [expandedInput1, setExpandedInput1] = useState(false);
   const [expandedInput2, setExpandedInput2] = useState(false);
   const [expandedOutput, setExpandedOutput] = useState(false);
-  const { addHistoryEntry } = useHistory();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLimit, setHistoryLimit] = useState(20);
+  const { addHistoryEntry, getHistoryByTool } = useHistory();
   const { toast } = useToast();
   const toastHelper = createToastHelper(toast);
+  
+  const toolHistory = getHistoryByTool("Diff Tool");
+  const visibleHistory = toolHistory.slice(0, historyLimit);
+  const hasMoreHistory = toolHistory.length > historyLimit;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        setHistoryOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const computeDiff = (text1: string, text2: string): DiffLine[] => {
     const lines1 = text1.split('\n');
@@ -148,6 +165,93 @@ export function DiffTool() {
           <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             Diff Tool
           </h1>
+          <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:from-violet-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <History className="h-4 w-4" />
+                History
+                {toolHistory.length > 0 && (
+                  <Badge variant="secondary" className="bg-white/20 text-white hover:bg-white/30">
+                    {toolHistory.length}
+                  </Badge>
+                )}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">History</h2>
+                  <Badge variant="secondary">{toolHistory.length} items</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">Recent operations (showing {visibleHistory.length} of {toolHistory.length})</p>
+                {toolHistory.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No history yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {visibleHistory.map((entry, index) => (
+                      <Card key={index} className="p-4 hover:bg-accent/50 transition-colors">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className="font-mono text-xs">
+                                  {entry.tool}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(entry.timestamp).toLocaleString()}
+                                </span>
+                              </div>
+                              <div className="space-y-2">
+                                {entry.input && (
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <div className="text-xs font-medium text-muted-foreground">Input:</div>
+                                    </div>
+                                    <pre className="text-xs bg-muted/50 p-2 rounded overflow-x-auto max-h-16">
+                                      {typeof entry.input === 'string' ? entry.input : JSON.stringify(entry.input, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                                {entry.output && (
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <div className="text-xs font-medium text-muted-foreground">Result:</div>
+                                    </div>
+                                    <pre className="text-xs bg-muted p-2 rounded overflow-x-auto max-h-16">
+                                      {typeof entry.output === 'string' ? entry.output : JSON.stringify(entry.output, null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                    {hasMoreHistory && (
+                      <div className="text-center pt-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setHistoryLimit(prev => prev + 20)}
+                        >
+                          Load More ({toolHistory.length - historyLimit} remaining)
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           {stats.total > 0 && (
             <div className="flex gap-2">
               {stats.added > 0 && (

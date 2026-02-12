@@ -16,10 +16,13 @@ export function History() {
   const { toast } = useToast();
 
   const filteredHistory = history.filter(entry => {
+    const inputStr = typeof entry.input === 'string' ? entry.input : JSON.stringify(entry.input);
+    const outputStr = typeof entry.output === 'string' ? entry.output : JSON.stringify(entry.output);
+    
     const matchesSearch = searchTerm === "" || 
       entry.tool.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.input.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.output.toLowerCase().includes(searchTerm.toLowerCase());
+      inputStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      outputStr.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesTool = filterTool === "all" || entry.tool === filterTool;
     
@@ -48,8 +51,13 @@ export function History() {
     return new Date(timestamp).toLocaleString();
   };
 
-  const truncateText = (text: string, maxLength: number = 100) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  const truncateText = (text: string | any, maxLength: number = 100) => {
+    const str = typeof text === 'string' ? text : JSON.stringify(text, null, 2);
+    return str.length > maxLength ? str.substring(0, maxLength) + "..." : str;
+  };
+
+  const formatField = (field: string | any): string => {
+    return typeof field === 'string' ? field : JSON.stringify(field, null, 2);
   };
 
   return (
@@ -71,20 +79,6 @@ export function History() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <Label htmlFor="search">Search</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="search"
-                  placeholder="Search history..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            
             <div className="w-full sm:w-48">
               <Label htmlFor="tool-filter">Filter by Tool</Label>
           <Select value={filterTool} onValueChange={setFilterTool}>
@@ -98,6 +92,20 @@ export function History() {
               ))}
             </SelectContent>
           </Select>
+            </div>
+
+            <div className="flex-1">
+              <Label htmlFor="search">Search</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Search history..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
           </div>
           
@@ -173,12 +181,12 @@ export function History() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => copyToClipboard(entry.input, "Input")}
+                        onClick={() => copyToClipboard(formatField(entry.input), "Input")}
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
                     </div>
-                    <div className="bg-muted p-3 rounded-md font-mono text-sm">
+                    <div className="bg-muted p-3 rounded-md font-mono text-sm whitespace-pre-wrap">
                       {truncateText(entry.input)}
                     </div>
                   </div>
@@ -193,13 +201,13 @@ export function History() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => copyToClipboard(entry.output, "Output")}
+                        onClick={() => copyToClipboard(formatField(entry.output), "Output")}
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
-                  <div className={`p-3 rounded-md font-mono text-sm ${
+                  <div className={`p-3 rounded-md font-mono text-sm whitespace-pre-wrap ${
                     entry.error ? 'bg-destructive/10 text-destructive' : 'bg-muted'
                   }`}>
                     {entry.error || truncateText(entry.output)}

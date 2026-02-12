@@ -61,7 +61,7 @@ const generators = [
   { title: "RG Generator", url: "/generators/rg", icon: IdCard },
   { title: "CEP Generator", url: "/generators/cep", icon: MapPin },
   { title: "Phone Generator", url: "/generators/phone", icon: Phone },
-  { title: "Lorem Ipsum", url: "/generators/lorem", icon: FileText },
+  { title: "Credit Card Generator", url: "/generators/credit-card", icon: CreditCard },
 ];
 
 const validators = [
