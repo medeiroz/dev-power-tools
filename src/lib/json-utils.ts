@@ -170,12 +170,18 @@ export function deserializeJson(input: string, recursive = false): JsonParseResu
 
 /**
  * Recursively parse JSON strings within an object
+ * Only parses strings that are valid JSON objects or arrays, not primitives
  */
 function recursiveJsonParse(obj: any): any {
   if (typeof obj === 'string') {
     try {
       const parsed = JSON.parse(obj);
-      return recursiveJsonParse(parsed);
+      // Only recursively parse if the result is an object or array, not primitives
+      if (parsed !== null && (typeof parsed === 'object')) {
+        return recursiveJsonParse(parsed);
+      }
+      // If it's a primitive (number, boolean, null), return the original string
+      return obj;
     } catch {
       return obj;
     }
