@@ -75,6 +75,7 @@ const validators = [
 ];
 
 const utilities = [
+  { title: "Token Counter", url: "/utils/token-counter", icon: Calculator },
   { title: "JWT Decoder", url: "/utils/jwt", icon: Key },
   { title: "Base64 Encode/Decode", url: "/utils/base64", icon: FileType },
   { title: "URL Encode/Decode", url: "/utils/url", icon: Globe },

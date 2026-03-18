@@ -33,6 +33,7 @@ import { RegexTester } from "@/components/utilities/regex-tester";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { LoremIpsum } from "@/components/lorem-ipsum";
 import { DiffTool } from "@/components/diff-tool";
+import { TokenCounter } from "@/components/token-counter";
 import NotFound from "@/pages/NotFound";
 import { History } from "@/components/history";
 
@@ -95,6 +96,7 @@ const App = () => (
                   <Route path="/utils/diff" element={<DiffTool />} />
                   <Route path="/utils/lorem" element={<LoremIpsum />} />
                   <Route path="/utils/markdown" element={<MarkdownEditor />} />
+                  <Route path="/utils/token-counter" element={<TokenCounter />} />
                   <Route path="/utilities/url-encoder" element={<UrlEncoder />} />
                   <Route path="/utilities/hash-generator" element={<HashGenerator />} />
                   <Route path="/utilities/timestamp-converter" element={<TimestampConverter />} />
